@@ -1,0 +1,12 @@
+schema {
+    query: Query
+}
+
+type Query {
+    hello(id: ID!): Hello!
+}
+
+type Hello {
+    id: ID!
+    text: String!
+}
