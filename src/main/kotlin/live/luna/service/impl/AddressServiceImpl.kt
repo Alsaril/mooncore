@@ -12,8 +12,8 @@ class AddressServiceImpl : AddressService {
     @Autowired
     private lateinit var addressDao: AddressDao
 
-    override fun save(address: Address) {
-        addressDao.save(address)
+    override fun insert(address: Address) {
+        addressDao.insert(address)
     }
 
     override fun update(address: Address) {
@@ -24,7 +24,7 @@ class AddressServiceImpl : AddressService {
         addressDao.delete(address)
     }
 
-    override fun getById(id: Long): Address {
+    override fun getById(id: Long): Address? {
         return addressDao.getById(id)
     }
 }
