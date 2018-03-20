@@ -15,16 +15,16 @@ class AddressDaoImpl : AddressDao {
     @PersistenceContext
     private lateinit var em: EntityManager
 
-    override fun insert(address: Address) {
-        em.persist(address)
+    override fun insert(entity: Address) {
+        em.persist(entity)
     }
 
-    override fun update(address: Address) {
-        em.merge(address)
+    override fun update(entity: Address) {
+        em.merge(entity)
     }
 
-    override fun delete(address: Address) {
-        em.remove(address)
+    override fun delete(entity: Address) {
+        em.remove(entity)
     }
 
     override fun getById(id: Long): Address? {
