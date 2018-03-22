@@ -7,12 +7,15 @@ import javax.persistence.*
 data class Tag(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "ID", nullable = false)
+        @Column(name = "id", nullable = false)
         val id: Long = 0,
 
         @Column(name = "name", nullable = false)
-        val name: String
+        val name: String,
+
+        @ManyToMany(mappedBy = "tags")
+        val photos: Set<Photo>
 
 ) {
-    constructor() : this(name = "")
+    constructor() : this(name = "", photos = HashSet())
 }

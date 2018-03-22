@@ -7,7 +7,7 @@ import javax.persistence.*
 data class Sign(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "ID", nullable = false)
+        @Column(name = "id", nullable = false)
         val id: Long = 0,
 
         @Column(name = "name", nullable = false)
@@ -17,7 +17,10 @@ data class Sign(
         val icon: String,
 
         @Column(name = "description", nullable = false)
-        val description: String
+        val description: String,
+
+        @ManyToMany(mappedBy = "signs")
+        val masters: Set<Master>
 ) {
-    constructor() : this(name = "", icon = "", description = "")
+    constructor() : this(name = "", icon = "", description = "", masters = HashSet())
 }

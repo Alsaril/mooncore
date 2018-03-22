@@ -7,7 +7,7 @@ import javax.persistence.*
 data class Master(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "ID", nullable = false)
+        @Column(name = "id", nullable = false)
         val id: Long = 0,
 
         @Column(name = "name", nullable = false)
@@ -30,8 +30,32 @@ data class Master(
         val salon: Salon,
 
         @Column(name = "stars", nullable = false)
-        val stars: Int = 0
+        val stars: Int = 0,
+
+        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @JoinTable(
+                name = "master_sign",
+                joinColumns = [(JoinColumn(name = "master_id"))],
+                inverseJoinColumns = [(JoinColumn(name = "sign_id"))]
+        )
+        val signs: Set<Sign>,
+
+        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @JoinTable(
+                name = "master_photo",
+                joinColumns = [(JoinColumn(name = "master_id"))],
+                inverseJoinColumns = [(JoinColumn(name = "photo_id"))]
+        )
+        val photos: Set<Photo>
 
 ) {
-    constructor() : this(name = "", user = User(), address = Address(), photo = Photo(), salon = Salon())
+    constructor() : this(
+            name = "",
+            user = User(),
+            address = Address(),
+            photo = Photo(),
+            salon = Salon(),
+            signs = HashSet(),
+            photos = HashSet()
+    )
 }
