@@ -13,7 +13,7 @@ data class Client(
         @Column(name = "name", nullable = false)
         val name: String,
 
-        @ManyToOne
+        @OneToOne
         @JoinColumn(name = "user_id", nullable = false)
         val user: User,
 

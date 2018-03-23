@@ -17,7 +17,7 @@ data class Salon(
         @JoinColumn(name = "address_id", nullable = false)
         val address: Address,
 
-        @ManyToOne
+        @OneToOne
         @JoinColumn(name = "photo_id", nullable = false)
         val photo: Photo,
 

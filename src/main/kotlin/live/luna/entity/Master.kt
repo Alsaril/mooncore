@@ -13,7 +13,7 @@ data class Master(
         @Column(name = "name", nullable = false)
         val name: String,
 
-        @ManyToOne
+        @OneToOne
         @JoinColumn(name = "user_id", nullable = false)
         val user: User,
 
@@ -21,7 +21,7 @@ data class Master(
         @JoinColumn(name = "address_id", nullable = false)
         val address: Address,
 
-        @ManyToOne
+        @OneToOne
         @JoinColumn(name = "photo_id", nullable = false)
         val photo: Photo,
 
