@@ -26,8 +26,8 @@ data class Master(
         val photo: Photo,
 
         @ManyToOne
-        @JoinColumn(name = "salon_id", nullable = false)
-        val salon: Salon,
+        @JoinColumn(name = "salon_id", nullable = true)
+        val salon: Salon?,
 
         @Column(name = "stars", nullable = false)
         val stars: Int = 0,

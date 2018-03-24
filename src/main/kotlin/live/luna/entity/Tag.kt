@@ -11,11 +11,7 @@ data class Tag(
         val id: Long = 0,
 
         @Column(name = "name", nullable = false)
-        val name: String,
-
-        @ManyToMany(mappedBy = "tags")
-        val photos: Set<Photo>
-
+        val name: String
 ) {
-    constructor() : this(name = "", photos = HashSet())
+    constructor() : this(name = "")
 }
