@@ -46,7 +46,10 @@ data class Master(
                 joinColumns = [(JoinColumn(name = "master_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "photo_id"))]
         )
-        val photos: Set<Photo>
+        val photos: Set<Photo>,
+
+        @OneToMany(mappedBy = "master", cascade = [(CascadeType.ALL)])
+        val services: List<Service>
 
 ) {
     constructor() : this(
@@ -56,6 +59,7 @@ data class Master(
             photo = Photo(),
             salon = Salon(),
             signs = HashSet(),
-            photos = HashSet()
+            photos = HashSet(),
+            services = ArrayList()
     )
 }

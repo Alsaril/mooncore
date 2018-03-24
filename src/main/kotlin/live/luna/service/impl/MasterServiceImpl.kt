@@ -27,4 +27,8 @@ class MasterServiceImpl : MasterService {
     override fun getById(id: Long): Master? {
         return masterDao.getById(id)
     }
+
+    override fun getList(limit: Int, offset: Int): List<Master> {
+        return masterDao.getList(limit, offset)
+    }
 }
