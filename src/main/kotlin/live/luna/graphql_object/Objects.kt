@@ -1,16 +1,19 @@
 package live.luna.graphql_object
 
 import graphql.Scalars.*
-import graphql.schema.GraphQLList
-import graphql.schema.GraphQLNonNull
-import graphql.schema.GraphQLOutputType
+import graphql.schema.*
 import live.luna.entity.*
+import live.luna.service.MasterService
+import org.springframework.beans.factory.annotation.Autowired
 
 val ID: GraphQLOutputType = GraphQLLong
+val inputID: GraphQLInputType = GraphQLLong
 fun graphQLListOfNonNull(type: GraphQLOutputType) = GraphQLList(GraphQLNonNull(type))
 
+@Autowired
+lateinit var masterService: MasterService
+
 val addressMetroObject = newObject<AddressMetro>("AddressMetro") {
-    (notNull("id", ID) {}) { it("id") }
     notNull("station", GraphQLString) { station }
     notNull("line", GraphQLString) { line }
     notNull("color", GraphQLString) { color }
@@ -67,12 +70,13 @@ val masterObject = newObject<Master>("Master") {
     notNull("id", ID) { id }
     notNull("name", GraphQLString) { name }
     notNull("user", userObject) { user }
-    notNull("address", addressObject) { address }
-    notNull("photo", photoObject) { photo }
+    nullable("address", addressObject) { address }
+    nullable("photo", photoObject) { photo }
     nullable("salon", salonObject) { salon }
     notNull("stars", GraphQLInt) { stars }
     notNull("signs", graphQLListOfNonNull(signObject)) { signs }
     notNull("photos", graphQLListOfNonNull(photoObject)) { photos }
+    // services
 }
 
 val serviceObject = newObject<Service>("Service") {
@@ -82,4 +86,28 @@ val serviceObject = newObject<Service>("Service") {
     notNull("stars", GraphQLInt) { stars }
     notNull("description", GraphQLString) { description }
     notNull("ctime", GraphQLString) { ctime }
+}
+
+val mixedUserObject = GraphQLUnionType.newUnionType()
+        .name("MixedUserObject")
+        .possibleType(masterObject)
+        .possibleType(clientObject)
+        .typeResolver { masterObject }
+        .build()
+
+val queryObject = newObject<Any>("Query") {
+
+    notNullA("master", masterObject) { required("id", inputID) }() {
+        val m = masterService.getById(it("id"))
+        m
+    }
+
+    notNullA("feed", graphQLListOfNonNull(masterObject)) {
+        required("offset", inputID)
+        required("limit", inputID)
+    }() {
+        masterService.feed(it("offset"), it("limit"))
+    }
+
+    notNull("viewer", mixedUserObject) {}
 }

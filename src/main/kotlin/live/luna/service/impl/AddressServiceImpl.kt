@@ -12,8 +12,8 @@ class AddressServiceImpl : AddressService {
     @Autowired
     private lateinit var addressDao: AddressDao
 
-    override fun insert(address: Address): Address {
-        return addressDao.insert(address)
+    override fun insert(address: Address) {
+        addressDao.insert(address)
     }
 
     override fun update(address: Address) {

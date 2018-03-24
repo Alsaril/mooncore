@@ -9,21 +9,31 @@ annotation class DSL
 class FieldBuilder<T> {
     val fields = mutableListOf<GraphQLFieldDefinition>()
 
-    fun nullable(name: String, type: GraphQLOutputType, description: String? = null, argumentCreator: ((@DSL ArgumentBuilder<T>).() -> Unit)? = null): (((@DSL T).(ArgumentHolder) -> Any)) -> Unit {
-        return { dataFetcher: T.(ArgumentHolder) -> Any ->
+    fun nullableA(name: String, type: GraphQLOutputType, description: String? = null, argumentCreator: (@DSL ArgumentBuilder).() -> Unit): (((@DSL T?).(ArgumentHolder) -> Any?)) -> Unit {
+        return { dataFetcher: T?.(ArgumentHolder) -> Any? ->
             val field = GraphQLFieldDefinition.Builder().name(name).type(type).dataFetcher { dataFetcher.invoke(it.getSource<T>(), ArgumentHolder(it.arguments)) }
             description?.let { field.description(description) }
-            argumentCreator?.let {
-                val argumentBuilder = ArgumentBuilder<T>()
-                it.invoke(argumentBuilder)
-                field.argument(argumentBuilder.arguments)
-            }
+
+            val argumentBuilder = ArgumentBuilder()
+            argumentCreator.invoke(argumentBuilder)
+            field.argument(argumentBuilder.arguments)
+
             fields.add(field.build())
         }
     }
 
-    fun notNull(name: String, type: GraphQLOutputType, description: String? = null, argumentCreator: ((@DSL ArgumentBuilder<T>).() -> Unit)? = null): (((@DSL T).(ArgumentHolder) -> Any)) -> Unit {
-        return nullable(name, GraphQLNonNull(type), description, argumentCreator)
+    fun notNullA(name: String, type: GraphQLOutputType, description: String? = null, argumentCreator: (@DSL ArgumentBuilder).() -> Unit): (((@DSL T?).(ArgumentHolder) -> Any?)) -> Unit {
+        return nullableA(name, GraphQLNonNull(type), description, argumentCreator)
+    }
+
+    fun nullable(name: String, type: GraphQLOutputType, description: String? = null, dataFetcher: (@DSL T).() -> Any?) {
+        val field = GraphQLFieldDefinition.Builder().name(name).type(type).dataFetcher { dataFetcher.invoke(it.getSource<T>()) }
+        description?.let { field.description(description) }
+        fields.add(field.build())
+    }
+
+    fun notNull(name: String, type: GraphQLOutputType, description: String? = null, dataFetcher: (@DSL T).() -> Any?) {
+        nullable(name, GraphQLNonNull(type), description, dataFetcher)
     }
 }
 
@@ -49,7 +59,7 @@ class ArgumentHolder(private val args: Map<String, Any>) {
     }
 }
 
-fun <T> newObject(name: String, description: String? = null, fieldCreator: (@DSL FieldBuilder<T>).() -> Unit): GraphQLOutputType {
+fun <T> newObject(name: String, description: String? = null, fieldCreator: (@DSL FieldBuilder<T>).() -> Unit): GraphQLObjectType {
     val objectType = GraphQLObjectType.newObject().name(name)
     description?.let { objectType.description(it) }
     val fieldBuilder = FieldBuilder<T>()
