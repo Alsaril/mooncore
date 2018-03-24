@@ -1,12 +1,13 @@
 buildscript {
-    ext.kotlin_version = "1.2.30"
-    ext.springBootVersion = "2.0.0.RELEASE"
+    ext.kotlin_version = "1.2.31"
+    ext.spring_boot_version = "2.0.0.RELEASE"
+    ext.spring_framework_version = "5.0.4.RELEASE"
 
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$spring_boot_version"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -28,21 +29,19 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-
-
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
+    compile "org.springframework.boot:spring-boot-starter-web:$spring_boot_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile "com.graphql-java:graphql-java:7.0"
-    testCompile group: "junit", name: "junit", version: "4.12"
+    testCompile "junit:junit:4.12"
 
     // Database
-    compile "org.springframework:spring-orm:5.0.4.RELEASE"
+    compile "org.springframework:spring-orm:$spring_framework_version"
     compile "mysql:mysql-connector-java:6.0.6"
     compile "org.hibernate:hibernate-core:5.2.15.Final"
+
+    compile'javax.xml.bind:jaxb-api:2.3.0'
 }
 
 compileKotlin {

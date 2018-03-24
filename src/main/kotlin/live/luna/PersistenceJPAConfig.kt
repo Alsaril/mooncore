@@ -34,7 +34,7 @@ class PersistenceJPAConfig {
         dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver")
         dataSource.url = "jdbc:mysql://localhost:3306/moondb?autoReconnect=true&useSSL=false&characterEncoding=utf8&" +
                 "useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
-        dataSource.username = "root"
+        dataSource.username = "moon"
         dataSource.password = ""
         return dataSource
     }
@@ -53,7 +53,7 @@ class PersistenceJPAConfig {
 
     internal fun additionalProperties(): Properties {
         val properties = Properties()
-        properties.setProperty("hibernate.hbm2ddl.auto", "update")  // use 'validate' in production!
+        properties.setProperty("hibernate.hbm2ddl.auto", "validate")
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect")
         properties.setProperty("hibernate.dialect.storage_engine", "innodb")
         properties.setProperty("hibernate.show_sql", "true")
