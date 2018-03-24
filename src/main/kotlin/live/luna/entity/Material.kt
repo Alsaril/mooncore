@@ -1,7 +1,7 @@
 package live.luna.entity
 
-import live.luna.GraphQLField
-import live.luna.GraphQLObject
+import live.luna.graphql.GraphQLField
+import live.luna.graphql.GraphQLObject
 import javax.persistence.*
 
 @Entity

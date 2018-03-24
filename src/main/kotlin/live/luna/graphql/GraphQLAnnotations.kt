@@ -1,4 +1,4 @@
-package live.luna
+package live.luna.graphql
 
 import graphql.Scalars
 import graphql.Scalars.*

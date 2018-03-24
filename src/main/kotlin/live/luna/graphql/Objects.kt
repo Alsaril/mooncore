@@ -1,8 +1,5 @@
-package live.luna.graphql_object
+package live.luna.graphql
 
-import live.luna.Argument
-import live.luna.GraphQLField
-import live.luna.GraphQLObject
 import live.luna.entity.Master
 import live.luna.service.MasterService
 
