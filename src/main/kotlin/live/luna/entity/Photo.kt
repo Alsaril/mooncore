@@ -1,16 +1,21 @@
 package live.luna.entity
 
+import live.luna.GraphQLField
+import live.luna.GraphQLObject
 import javax.persistence.*
 
 @Entity
 @Table(name = "photo")
+@GraphQLObject
 data class Photo(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "id", nullable = false)
+        @GraphQLField
         val id: Long = 0,
 
         @Column(name = "path", nullable = false)
+        @GraphQLField
         val path: String,
 
         @ManyToMany(cascade = [(CascadeType.ALL)])
@@ -19,7 +24,8 @@ data class Photo(
                 joinColumns = [(JoinColumn(name = "photo_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "tag_id"))]
         )
-        val tags: Set<Tag>
+        @GraphQLField(of = Tag::class)
+        val tags: List<Tag>
 ) {
-    constructor() : this(path = "", tags = HashSet())
+        constructor() : this(path = "", tags = ArrayList())
 }

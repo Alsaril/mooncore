@@ -1,8 +1,7 @@
 package live.luna
 
 import graphql.GraphQL
-import graphql.schema.GraphQLSchema
-import live.luna.graphql_object.queryObject
+import live.luna.graphql_object.Query
 import org.jetbrains.annotations.Nullable
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -13,8 +12,7 @@ import javax.annotation.PostConstruct
 class Application {
     @PostConstruct
     fun init() {
-        val schema = GraphQLSchema.newSchema().query(queryObject).build()
-        graphQL = GraphQL.newGraphQL(schema).build()
+        graphQL = GraphQL.newGraphQL(buildSchema(Query::class.java, null)).build()
     }
 
     companion object {

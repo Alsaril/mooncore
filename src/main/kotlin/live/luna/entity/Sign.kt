@@ -1,26 +1,34 @@
 package live.luna.entity
 
+import live.luna.GraphQLField
+import live.luna.GraphQLObject
 import javax.persistence.*
 
 @Entity
 @Table(name = "sign")
+@GraphQLObject
 data class Sign(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "id", nullable = false)
+        @GraphQLField
         val id: Long = 0,
 
         @Column(name = "name", nullable = false)
+        @GraphQLField
         val name: String,
 
         @Column(name = "icon", nullable = false)
+        @GraphQLField
         val icon: String,
 
         @Column(name = "description", nullable = false)
+        @GraphQLField
         val description: String,
 
         @ManyToMany(mappedBy = "signs")
-        val masters: Set<Master>
+        @GraphQLField(of = Master::class)
+        val masters: List<Master>
 ) {
-    constructor() : this(name = "", icon = "", description = "", masters = HashSet())
+        constructor() : this(name = "", icon = "", description = "", masters = ArrayList())
 }

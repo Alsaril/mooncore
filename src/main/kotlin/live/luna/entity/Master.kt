@@ -1,35 +1,45 @@
 package live.luna.entity
 
+import live.luna.GraphQLField
+import live.luna.GraphQLObject
 import javax.persistence.*
 
 @Entity
 @Table(name = "master")
+@GraphQLObject
 data class Master(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "id", nullable = false)
+        @GraphQLField
         val id: Long = 0,
 
         @Column(name = "name", nullable = false)
+        @GraphQLField
         val name: String,
 
         @OneToOne
         @JoinColumn(name = "user_id", nullable = false)
+        @GraphQLField
         val user: User,
 
         @ManyToOne
         @JoinColumn(name = "address_id", nullable = false)
+        @GraphQLField
         val address: Address,
 
         @OneToOne
         @JoinColumn(name = "photo_id", nullable = false)
+        @GraphQLField
         val photo: Photo,
 
         @ManyToOne
         @JoinColumn(name = "salon_id", nullable = true)
+        @GraphQLField(nullable = true)
         val salon: Salon?,
 
         @Column(name = "stars", nullable = false)
+        @GraphQLField
         val stars: Int = 0,
 
         @ManyToMany(cascade = [(CascadeType.ALL)])
@@ -38,7 +48,8 @@ data class Master(
                 joinColumns = [(JoinColumn(name = "master_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "sign_id"))]
         )
-        val signs: Set<Sign>,
+        @GraphQLField(of = Sign::class)
+        val signs: List<Sign>,
 
         @ManyToMany(cascade = [(CascadeType.ALL)])
         @JoinTable(
@@ -46,9 +57,11 @@ data class Master(
                 joinColumns = [(JoinColumn(name = "master_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "photo_id"))]
         )
-        val photos: Set<Photo>,
+        @GraphQLField(of = Photo::class)
+        val photos: List<Photo>,
 
         @OneToMany(mappedBy = "master", cascade = [(CascadeType.ALL)])
+        @GraphQLField(of = Service::class)
         val services: List<Service>
 
 ) {
@@ -58,8 +71,8 @@ data class Master(
             address = Address(),
             photo = Photo(),
             salon = Salon(),
-            signs = HashSet(),
-            photos = HashSet(),
+            signs = ArrayList(),
+            photos = ArrayList(),
             services = ArrayList()
     )
 }
