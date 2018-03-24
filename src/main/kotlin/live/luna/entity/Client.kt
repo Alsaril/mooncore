@@ -24,10 +24,19 @@ data class Client(
         val user: User,
 
         @ManyToOne
-        @JoinColumn(name = "photo_id", nullable = false)
+        @JoinColumn(name = "avatar_id", nullable = false)
         @GraphQLField
-        val photo: Photo
+        val avatar: Photo,
+
+        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @JoinTable(
+                name = "client_favorites",
+                joinColumns = [(JoinColumn(name = "client_id"))],
+                inverseJoinColumns = [(JoinColumn(name = "master_id"))]
+        )
+        @GraphQLField(of = Master::class)
+        val favorites: List<Master>
 
 ) {
-    constructor() : this(user = User(), photo = Photo(), name = "")
+    constructor() : this(user = User(), avatar = Photo(), name = "", favorites = ArrayList())
 }

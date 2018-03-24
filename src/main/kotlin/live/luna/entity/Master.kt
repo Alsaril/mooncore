@@ -29,9 +29,9 @@ data class Master(
         val address: Address,
 
         @OneToOne
-        @JoinColumn(name = "photo_id", nullable = false)
+        @JoinColumn(name = "avatar_id", nullable = false)
         @GraphQLField
-        val photo: Photo,
+        val avatar: Photo,
 
         @ManyToOne
         @JoinColumn(name = "salon_id", nullable = true)
@@ -69,7 +69,7 @@ data class Master(
             name = "",
             user = User(),
             address = Address(),
-            photo = Photo(),
+            avatar = Photo(),
             salon = Salon(),
             signs = ArrayList(),
             photos = ArrayList(),
