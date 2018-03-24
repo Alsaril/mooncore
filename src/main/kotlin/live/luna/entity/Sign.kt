@@ -20,7 +20,7 @@ data class Sign(
         val description: String,
 
         @ManyToMany(mappedBy = "signs")
-        val masters: Set<Master>
+        val masters: List<Master>
 ) {
-    constructor() : this(name = "", icon = "", description = "", masters = HashSet())
+    constructor() : this(name = "", icon = "", description = "", masters = ArrayList())
 }

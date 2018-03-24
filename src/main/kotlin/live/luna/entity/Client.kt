@@ -18,9 +18,17 @@ data class Client(
         val user: User,
 
         @ManyToOne
-        @JoinColumn(name = "photo_id", nullable = false)
-        val photo: Photo
+        @JoinColumn(name = "avatar_id", nullable = false)
+        val avatar: Photo,
+
+        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @JoinTable(
+                name = "client_favorites",
+                joinColumns = [(JoinColumn(name = "client_id"))],
+                inverseJoinColumns = [(JoinColumn(name = "master_id"))]
+        )
+        val favorites: List<Master>
 
 ) {
-    constructor() : this(user = User(), photo = Photo(), name = "")
+    constructor() : this(user = User(), avatar = Photo(), name = "", favorites = ArrayList())
 }

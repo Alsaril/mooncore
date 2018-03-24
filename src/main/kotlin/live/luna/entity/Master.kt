@@ -38,7 +38,7 @@ data class Master(
                 joinColumns = [(JoinColumn(name = "master_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "sign_id"))]
         )
-        val signs: Set<Sign>,
+        val signs: List<Sign>,
 
         @ManyToMany(cascade = [(CascadeType.ALL)])
         @JoinTable(
@@ -46,7 +46,7 @@ data class Master(
                 joinColumns = [(JoinColumn(name = "master_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "photo_id"))]
         )
-        val photos: Set<Photo>,
+        val photos: List<Photo>,
 
         @OneToMany(mappedBy = "master", cascade = [(CascadeType.ALL)])
         val services: List<Service>
@@ -58,8 +58,8 @@ data class Master(
             address = Address(),
             avatar = Photo(),
             salon = Salon(),
-            signs = HashSet(),
-            photos = HashSet(),
+            signs = ArrayList(),
+            photos = ArrayList(),
             services = ArrayList()
     )
 }

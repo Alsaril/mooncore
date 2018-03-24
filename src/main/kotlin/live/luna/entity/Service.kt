@@ -2,6 +2,7 @@ package live.luna.entity
 
 import java.util.*
 import javax.persistence.*
+import kotlin.collections.ArrayList
 
 @Entity
 @Table(name = "service")
@@ -26,8 +27,24 @@ data class Service(
 
         @Column(name = "ctime", nullable = false)
         @Temporal(TemporalType.TIMESTAMP)
-        val ctime: Date = Date()
+        val ctime: Date = Date(),
+
+        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @JoinTable(
+                name = "service_material",
+                joinColumns = [(JoinColumn(name = "service_id"))],
+                inverseJoinColumns = [(JoinColumn(name = "material_id"))]
+        )
+        val materials: List<Material>,
+
+        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @JoinTable(
+                name = "service_photo",
+                joinColumns = [(JoinColumn(name = "service_id"))],
+                inverseJoinColumns = [(JoinColumn(name = "photo_id"))]
+        )
+        val photos: List<Photo>
 
 ) {
-    constructor() : this(name = "", master = Master())
+    constructor() : this(name = "", master = Master(), materials = ArrayList(), photos = ArrayList())
 }

@@ -19,7 +19,7 @@ data class Photo(
                 joinColumns = [(JoinColumn(name = "photo_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "tag_id"))]
         )
-        val tags: Set<Tag>
+        val tags: List<Tag>
 ) {
-    constructor() : this(path = "", tags = HashSet())
+    constructor() : this(path = "", tags = ArrayList())
 }
