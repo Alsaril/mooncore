@@ -30,4 +30,20 @@ class MasterDaoImpl : MasterDao {
     override fun getById(id: Long): Master? {
         return em.find(Master::class.java, id)
     }
+
+    override fun getList(limit: Int, offset: Int): List<Master> {
+        if (limit <= 0 || offset < 0) {
+            return emptyList()
+        }
+
+        val criteriaQuery = em.criteriaBuilder.createQuery(Master::class.java)
+        val from = criteriaQuery.from(Master::class.java)
+        val select = criteriaQuery.select(from)
+
+        val typedQuery = em.createQuery(select)
+        typedQuery.firstResult = offset
+        typedQuery.maxResults = limit
+
+        return typedQuery.resultList
+    }
 }

@@ -22,8 +22,8 @@ data class Master(
         val address: Address,
 
         @OneToOne
-        @JoinColumn(name = "photo_id", nullable = false)
-        val photo: Photo,
+        @JoinColumn(name = "avatar_id", nullable = false)
+        val avatar: Photo,
 
         @ManyToOne
         @JoinColumn(name = "salon_id", nullable = true)
@@ -46,16 +46,20 @@ data class Master(
                 joinColumns = [(JoinColumn(name = "master_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "photo_id"))]
         )
-        val photos: Set<Photo>
+        val photos: Set<Photo>,
+
+        @OneToMany(mappedBy = "master", cascade = [(CascadeType.ALL)])
+        val services: List<Service>
 
 ) {
     constructor() : this(
             name = "",
             user = User(),
             address = Address(),
-            photo = Photo(),
+            avatar = Photo(),
             salon = Salon(),
             signs = HashSet(),
-            photos = HashSet()
+            photos = HashSet(),
+            services = ArrayList()
     )
 }

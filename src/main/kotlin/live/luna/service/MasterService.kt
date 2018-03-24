@@ -7,4 +7,5 @@ interface MasterService {
     fun update(master: Master)
     fun delete(master: Master)
     fun getById(id: Long): Master?
+    fun getList(limit: Int, offset: Int): List<Master>
 }
