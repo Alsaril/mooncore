@@ -19,10 +19,7 @@ data class Photo(
                 joinColumns = [(JoinColumn(name = "photo_id"))],
                 inverseJoinColumns = [(JoinColumn(name = "tag_id"))]
         )
-        val tags: Set<Tag>,
-
-        @ManyToMany(mappedBy = "photos")
-        val masters: Set<Master>
+        val tags: Set<Tag>
 ) {
-    constructor() : this(path = "", tags = HashSet(), masters = HashSet())
+    constructor() : this(path = "", tags = HashSet())
 }

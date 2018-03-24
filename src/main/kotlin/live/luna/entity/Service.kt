@@ -19,7 +19,7 @@ data class Service(
         val master: Master,
 
         @Column(name = "price", nullable = false)
-        val stars: Double = 0.0,
+        val price: Double = 0.0,
 
         @Column(name = "description", nullable = false, columnDefinition = "TEXT")
         val description: String = "",

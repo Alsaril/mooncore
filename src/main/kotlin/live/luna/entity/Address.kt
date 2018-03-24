@@ -17,7 +17,10 @@ data class Address(
         val lon: Double,
 
         @Column(name = "description", nullable = false)
-        val description: String
+        val description: String,
+
+        @OneToMany(mappedBy = "address", cascade = [(CascadeType.ALL)])
+        val metros: List<AddressMetro>
 ) {
-    constructor() : this(lat = 0.0, lon = 0.0, description = "")
+    constructor() : this(lat = 0.0, lon = 0.0, description = "", metros = ArrayList())
 }
