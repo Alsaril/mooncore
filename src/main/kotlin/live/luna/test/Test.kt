@@ -12,13 +12,18 @@ import javax.servlet.http.HttpServletRequest
 class HelloController {
 
     @PostMapping("/")
-    fun index(@RequestBody body: String, request: HttpServletRequest): Any {
+    fun index(@RequestBody body: GraphQLRequest, request: HttpServletRequest): Any {
 
         val executionInput = newExecutionInput()
-                .query(body)
+                .query(body.query)
+                .variables(body.variables)
 
         val executionResult = graphQL.execute(executionInput.build())
         return executionResult.getData() ?: executionResult.errors
     }
 
+    class GraphQLRequest {
+        lateinit var query: String
+        lateinit var variables: Map<String, Any>
+    }
 }
