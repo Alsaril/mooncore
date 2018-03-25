@@ -190,6 +190,7 @@ private fun getInputType(klass: Klass): GraphQLInputType = when (klass) {
     Long::class.java -> GraphQLLong
     String::class.java -> GraphQLString
     Boolean::class.java -> GraphQLBoolean
+    Double::class.java -> GraphQLFloat
     else -> throw GraphQLSchemaBuilderException("Unknown input type ${klass.name}")
 }
 
