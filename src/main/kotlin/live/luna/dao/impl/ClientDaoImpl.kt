@@ -1,7 +1,7 @@
 package live.luna.dao.impl
 
-import live.luna.dao.AddressDao
-import live.luna.entity.Address
+import live.luna.dao.ClientDao
+import live.luna.entity.Client
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -10,24 +10,24 @@ import javax.persistence.PersistenceContext
 
 @Repository
 @Transactional
-class AddressDaoImpl : AddressDao {
+class ClientDaoImpl : ClientDao {
 
     @PersistenceContext
     private lateinit var em: EntityManager
 
-    override fun insert(entity: Address) {
-        return em.persist(entity)
+    override fun insert(entity: Client) {
+        em.persist(entity)
     }
 
-    override fun update(entity: Address) {
+    override fun update(entity: Client) {
         em.merge(entity)
     }
 
-    override fun delete(entity: Address) {
+    override fun delete(entity: Client) {
         em.remove(entity)
     }
 
-    override fun getById(id: Long): Address? {
-        return em.find(Address::class.java, id)
+    override fun getById(id: Long): Client? {
+        return em.find(Client::class.java, id)
     }
 }

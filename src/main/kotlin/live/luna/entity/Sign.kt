@@ -5,30 +5,30 @@ import live.luna.graphql.GraphQLObject
 import javax.persistence.*
 
 @Entity
-@Table(name = "address")
+@Table(name = "sign")
 @GraphQLObject
-data class Address(
+data class Sign(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "id", nullable = false)
         @GraphQLField
         val id: Long = 0,
 
-        @Column(name = "lat", nullable = false)
+        @Column(name = "name", nullable = false)
         @GraphQLField
-        val lat: Double,
+        val name: String,
 
-        @Column(name = "lon", nullable = false)
+        @Column(name = "icon", nullable = false)
         @GraphQLField
-        val lon: Double,
+        val icon: String,
 
         @Column(name = "description", nullable = false)
         @GraphQLField
         val description: String,
 
-        @OneToMany(mappedBy = "address", cascade = [CascadeType.ALL])
-        @GraphQLField(of = AddressMetro::class)
-        val metros: List<AddressMetro>
+        @ManyToMany(mappedBy = "signs")
+        @GraphQLField(of = Master::class)
+        val masters: List<Master>
 ) {
-    constructor() : this(lat = 0.0, lon = 0.0, description = "", metros = ArrayList())
+        constructor() : this(name = "", icon = "", description = "", masters = ArrayList())
 }

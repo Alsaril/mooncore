@@ -18,7 +18,7 @@ class HelloController {
                 .query(body)
 
         val executionResult = graphQL.execute(executionInput.build())
-        return executionResult.getData() ?: "13"
+        return executionResult.getData() ?: executionResult.errors
     }
 
 }
