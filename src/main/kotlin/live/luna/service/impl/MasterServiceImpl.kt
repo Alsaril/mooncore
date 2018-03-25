@@ -31,4 +31,8 @@ class MasterServiceImpl : MasterService {
     override fun getList(limit: Int, offset: Int): List<Master> {
         return masterDao.getList(limit, offset)
     }
+
+    override fun getInArea(limit: Int, offset: Int, x1: Double, y1: Double, x2: Double, y2: Double): List<Master> {
+        return masterDao.getInArea(limit, offset, x1, y1, x2, y2)
+    }
 }
