@@ -3,14 +3,14 @@ package live.luna.graphql
 import graphql.Scalars
 import graphql.Scalars.*
 import graphql.schema.*
+import java.lang.reflect.AccessibleObject
 import java.lang.reflect.Field
+import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.util.*
 import kotlin.reflect.KClass
 
 // могут быть проблемы с одинаково названными типами
-// для методов дописать список в качестве возвращаемого типа
-// вынести создание нового типа в отдельную функцию (в 4 местах!)
 
 @Target(AnnotationTarget.CLASS)
 @MustBeDocumented
@@ -103,77 +103,57 @@ private fun <T> process(klass: Class<out T>, context: ProcessorContext): GraphQL
             .name(name)
             .description(description)
 
-    builder.fields(processFields(klass.declaredFields, context))
-    builder.fields(processMethods(klass.declaredMethods, context))
+    val fields = mutableListOf<GraphQLFieldDefinition>()
+    klass.declaredFields.forEach {
+        processEntity(true, it, context)?.let { fields.add(it) }
+    }
+    klass.declaredMethods.forEach {
+        processEntity(false, it, context)?.let { fields.add(it) }
+    }
 
-    val type = builder.build()
+    val type = builder.fields(fields).build()
     context.know(klass, type)
     return type
 }
 
-private fun processFields(fields: Array<Field>, context: ProcessorContext): List<GraphQLFieldDefinition> {
-    val result = mutableListOf<GraphQLFieldDefinition>()
-    fields.forEach {
-        val annotation = it.getAnnotation(GraphQLField::class.java) ?: return@forEach
+private fun processEntity(isField: Boolean, member: AccessibleObject, context: ProcessorContext): GraphQLFieldDefinition? {
+    val annotation = member.getAnnotation(GraphQLField::class.java) ?: return null
 
-        it.isAccessible = true
+    member.isAccessible = true
 
-        val isSimpleList = (it.type == List::class.java || it.type.interfaces.contains(List::class.java)) && annotation.of != Void::class
-        val baseKlass = if (isSimpleList) annotation.of.java else it.type
+    val klass = if (isField) (member as Field).type else (member as Method).returnType
+    val isSimpleList = (klass == List::class.java || klass.interfaces.contains(List::class.java)) && annotation.of != Void::class
+    val baseKlass = if (isSimpleList) annotation.of.java else klass
 
-        if (context.getType(baseKlass) == null) {
-            process(baseKlass, context)
-        }
-
-        val name = annotation.name.ifEmptyThen(it.name)
-        val description = annotation.description.ifEmptyThenNull()
-        val baseType = context.getType(baseKlass)
-                ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${it.type.name}")
-        val baseTypeNullable = annotation.ofNullable
-        val type = if (isSimpleList) GraphQLList(if (baseTypeNullable) baseType else GraphQLNonNull(baseType)) else baseType
-        val nullable = annotation.nullable
-
-        val graphQLField = GraphQLFieldDefinition.Builder()
-                .name(name)
-                .description(description)
-                .type(if (nullable) type else GraphQLNonNull(type))
-                .dataFetcher { env -> it.get(EnvironmentWrapper(env, it.declaringClass).source) }
-
-        result.add(graphQLField.build())
+    if (context.getType(baseKlass) == null) {
+        process(baseKlass, context)
     }
-    return result
-}
 
-private fun processMethods(methods: Array<Method>, context: ProcessorContext): List<GraphQLFieldDefinition> {
-    val result = mutableListOf<GraphQLFieldDefinition>()
-    methods.forEach { method ->
-        val annotation = method.getAnnotation(GraphQLField::class.java) ?: return@forEach
+    val name = annotation.name.ifEmptyThen((member as Member).name)
+    val description = annotation.description.ifEmptyThenNull()
+    val baseType = context.getType(baseKlass)
+            ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${baseKlass.name}")
+    val baseTypeNullable = annotation.ofNullable
+    val type = if (isSimpleList) GraphQLList(if (baseTypeNullable) baseType else GraphQLNonNull(baseType)) else baseType
+    val nullable = annotation.nullable
 
-        if (context.getType(method.returnType) == null) {
-            process(method.returnType, context)
+    val graphQLField = GraphQLFieldDefinition.Builder()
+            .name(name)
+            .description(description)
+            .type(if (nullable) type else GraphQLNonNull(type))
+
+    if (isField) {
+        graphQLField.dataFetcher { env -> (member as Field).get(EnvironmentWrapper(env, member.declaringClass).source) }
+    } else {
+        val (arguments, argumentInjectors) = processParameters(member as Method)
+        graphQLField.argument(arguments)
+        graphQLField.dataFetcher { env ->
+            val wrapper = EnvironmentWrapper(env, member.declaringClass)
+            member.invoke(wrapper.source, *argumentInjectors.map { it.invoke(wrapper) }.toTypedArray())
         }
-
-        method.isAccessible = true
-
-        val (arguments, argumentInjectors) = processParameters(method)
-
-        val name = annotation.name.ifEmptyThen(method.name)
-        val description = annotation.description.ifEmptyThenNull()
-        val type = context.getType(method.returnType)
-                ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${method.returnType.name}")
-        val nullable = annotation.nullable
-
-        val graphQLField = GraphQLFieldDefinition.Builder().name(name)
-                .description(description)
-                .argument(arguments)
-                .type(if (nullable) type else GraphQLNonNull(type))
-                .dataFetcher { env ->
-                    val wrapper = EnvironmentWrapper(env, method.declaringClass)
-                    method.invoke(wrapper.source, *argumentInjectors.map { it.invoke(wrapper) }.toTypedArray())
-                }
-        result.add(graphQLField.build())
     }
-    return result
+
+    return graphQLField.build()
 }
 
 private data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any>)
