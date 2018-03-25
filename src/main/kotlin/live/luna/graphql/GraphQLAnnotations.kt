@@ -118,46 +118,28 @@ private fun processFields(fields: Array<Field>, context: ProcessorContext): List
 
         it.isAccessible = true
 
-        if ((it.type == List::class.java || it.type.interfaces.contains(List::class.java)) && annotation.of != Void::class) {
-            if (context.getType(annotation.of.java) == null) {
-                process(annotation.of.java, context)
-            }
+        val isSimpleList = (it.type == List::class.java || it.type.interfaces.contains(List::class.java)) && annotation.of != Void::class
+        val baseKlass = if (isSimpleList) annotation.of.java else it.type
 
-            val name = annotation.name.ifEmptyThen(it.name)
-            val description = annotation.description.ifEmptyThenNull()
-            val subtype = context.getType(annotation.of.java)
-                    ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${it.type.name}")
-            val subtypeNullable = annotation.ofNullable
-            val type: GraphQLOutputType = GraphQLList(if (subtypeNullable) subtype else GraphQLNonNull(subtype))
-            val nullable = annotation.nullable
-
-            val graphQLField = GraphQLFieldDefinition.Builder()
-                    .name(name)
-                    .description(description)
-                    .type(if (nullable) type else GraphQLNonNull(type))
-                    .dataFetcher { env -> it.get(EnvironmentWrapper(env, it.declaringClass).source) }
-
-            result.add(graphQLField.build())
-        } else {
-
-            if (context.getType(it.type) == null) {
-                process(it.type, context)
-            }
-
-            val name = annotation.name.ifEmptyThen(it.name)
-            val description = annotation.description.ifEmptyThenNull()
-            val type = context.getType(it.type)
-                    ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${it.type.name}")
-            val nullable = annotation.nullable
-
-            val graphQLField = GraphQLFieldDefinition.Builder()
-                    .name(name)
-                    .description(description)
-                    .type(if (nullable) type else GraphQLNonNull(type))
-                    .dataFetcher { env -> it.get(EnvironmentWrapper(env, it.declaringClass).source) }
-
-            result.add(graphQLField.build())
+        if (context.getType(baseKlass) == null) {
+            process(baseKlass, context)
         }
+
+        val name = annotation.name.ifEmptyThen(it.name)
+        val description = annotation.description.ifEmptyThenNull()
+        val baseType = context.getType(baseKlass)
+                ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${it.type.name}")
+        val baseTypeNullable = annotation.ofNullable
+        val type = if (isSimpleList) GraphQLList(if (baseTypeNullable) baseType else GraphQLNonNull(baseType)) else baseType
+        val nullable = annotation.nullable
+
+        val graphQLField = GraphQLFieldDefinition.Builder()
+                .name(name)
+                .description(description)
+                .type(if (nullable) type else GraphQLNonNull(type))
+                .dataFetcher { env -> it.get(EnvironmentWrapper(env, it.declaringClass).source) }
+
+        result.add(graphQLField.build())
     }
     return result
 }
