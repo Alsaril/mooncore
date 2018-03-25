@@ -153,33 +153,9 @@ private fun processMethods(methods: Array<Method>, context: ProcessorContext): L
             process(method.returnType, context)
         }
 
-        val sourceKlass = method.declaringClass
-
-        val arguments = mutableListOf<GraphQLArgument>()
-        val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any>()
-
         method.isAccessible = true
 
-        method.parameters.forEach {
-            val parameterAnnotation = it.getAnnotation(Argument::class.java)
-            when {
-                parameterAnnotation != null -> {
-                    val name = parameterAnnotation.name
-                    val description = parameterAnnotation.description.ifEmptyThenNull()
-                    val nullable = parameterAnnotation.nullable
-                    val type = getInputType(it.type)
-
-                    val argument = GraphQLArgument.Builder()
-                            .name(name)
-                            .description(description)
-                            .type(if (nullable) type else GraphQLNonNull(type))
-                    arguments.add(argument.build())
-                    argumentInjectors.add { env -> env(name) }
-                }
-                it.type == sourceKlass -> argumentInjectors.add { env -> env.source }
-                else -> throw GraphQLSchemaBuilderException("Parameter ${it.type} in method ${method.name} cannot be injected")
-            }
-        }
+        val (arguments, argumentInjectors) = processParameters(method)
 
         val name = annotation.name.ifEmptyThen(method.name)
         val description = annotation.description.ifEmptyThenNull()
@@ -198,6 +174,36 @@ private fun processMethods(methods: Array<Method>, context: ProcessorContext): L
         result.add(graphQLField.build())
     }
     return result
+}
+
+private data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any>)
+
+private fun processParameters(method: Method): MethodSignatureHolder {
+    val arguments = mutableListOf<GraphQLArgument>()
+    val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any>()
+
+    val sourceKlass = method.declaringClass
+    val parameterAnnotation = method.getAnnotation(Argument::class.java)
+    method.parameters.forEach {
+        when {
+            parameterAnnotation != null -> {
+                val name = parameterAnnotation.name
+                val description = parameterAnnotation.description.ifEmptyThenNull()
+                val nullable = parameterAnnotation.nullable
+                val type = getInputType(it.type)
+
+                val argument = GraphQLArgument.Builder()
+                        .name(name)
+                        .description(description)
+                        .type(if (nullable) type else GraphQLNonNull(type))
+                arguments.add(argument.build())
+                argumentInjectors.add { env -> env(name) }
+            }
+            it.type == sourceKlass -> argumentInjectors.add { env -> env.source }
+            else -> throw GraphQLSchemaBuilderException("Parameter ${it.type} in method ${method.name} cannot be injected")
+        }
+    }
+    return MethodSignatureHolder(arguments.toList(), argumentInjectors.toList())
 }
 
 private class EnvironmentWrapper(private val environment: DataFetchingEnvironment, klass: Klass) {
