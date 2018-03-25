@@ -9,6 +9,8 @@ import java.util.*
 import kotlin.reflect.KClass
 
 // могут быть проблемы с одинаково названными типами
+// для методов дописать список в качестве возвращаемого типа
+// вынести создание нового типа в отдельную функцию (в 4 местах!)
 
 @Target(AnnotationTarget.CLASS)
 @MustBeDocumented
@@ -25,7 +27,8 @@ annotation class GraphQLField(
         val name: String = "",
         val description: String = "",
         val nullable: Boolean = false,
-        val of: KClass<*> = Void::class
+        val of: KClass<*> = Void::class,
+        val ofNullable: Boolean = false
 )
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
@@ -36,6 +39,10 @@ annotation class Argument(
         val description: String = "",
         val nullable: Boolean = false
 )
+
+enum class GraphQLModifier {
+    NOT_NULL, LIST
+}
 
 class GraphQLSchemaBuilderException(message: String, throwable: Throwable? = null) : Exception(message, throwable)
 
@@ -118,8 +125,10 @@ private fun processFields(fields: Array<Field>, context: ProcessorContext): List
 
             val name = annotation.name.ifEmptyThen(it.name)
             val description = annotation.description.ifEmptyThenNull()
-            val type: GraphQLOutputType = GraphQLList(context.getType(annotation.of.java) // declare new list type
-                    ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${it.type.name}"))
+            val subtype = context.getType(annotation.of.java)
+                    ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${it.type.name}")
+            val subtypeNullable = annotation.ofNullable
+            val type: GraphQLOutputType = GraphQLList(if (subtypeNullable) subtype else GraphQLNonNull(subtype))
             val nullable = annotation.nullable
 
             val graphQLField = GraphQLFieldDefinition.Builder()
@@ -166,6 +175,8 @@ private fun processMethods(methods: Array<Method>, context: ProcessorContext): L
 
         val arguments = mutableListOf<GraphQLArgument>()
         val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any>()
+
+        method.isAccessible = true
 
         method.parameters.forEach {
             val parameterAnnotation = it.getAnnotation(Argument::class.java)
