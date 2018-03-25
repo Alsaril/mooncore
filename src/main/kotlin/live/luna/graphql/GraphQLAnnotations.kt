@@ -46,16 +46,10 @@ enum class GraphQLModifier {
 
 class GraphQLSchemaBuilderException(message: String, throwable: Throwable? = null) : Exception(message, throwable)
 
-fun buildSchema(queryKlass: Klass?, mutationKlass: Klass?): GraphQLSchema {
-    if (queryKlass == null && mutationKlass == null) {
-        throw GraphQLSchemaBuilderException("Both query and mutation are null")
-    }
-
+fun buildSchema(queryKlass: Klass, mutationKlass: Klass?): GraphQLSchema {
     val processorContext = ProcessorContext()
 
-    val queryObject = queryKlass?.let {
-        process(it, processorContext)
-    }
+    val queryObject = process(queryKlass, processorContext)
 
     val mutationObject = mutationKlass?.let {
         process(it, processorContext)
@@ -163,8 +157,8 @@ private fun processParameters(method: Method): MethodSignatureHolder {
     val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any>()
 
     val sourceKlass = method.declaringClass
-    val parameterAnnotation = method.getAnnotation(Argument::class.java)
     method.parameters.forEach {
+        val parameterAnnotation = it.getAnnotation(Argument::class.java)
         when {
             parameterAnnotation != null -> {
                 val name = parameterAnnotation.name

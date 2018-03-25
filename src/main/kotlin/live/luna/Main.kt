@@ -4,7 +4,6 @@ import graphql.GraphQL
 import live.luna.graphql.Query
 import live.luna.graphql.buildSchema
 import live.luna.service.MasterService
-import org.jetbrains.annotations.Nullable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -24,7 +23,6 @@ class Application @Autowired constructor(masterService: MasterService) {
     }
 
     companion object {
-        @Nullable
         lateinit var graphQL: GraphQL
 
         @JvmStatic
