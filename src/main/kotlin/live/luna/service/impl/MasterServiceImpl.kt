@@ -32,7 +32,9 @@ class MasterServiceImpl : MasterService {
         return masterDao.getList(limit, offset)
     }
 
-    override fun getInArea(limit: Int, offset: Int, x1: Double, y1: Double, x2: Double, y2: Double): List<Master> {
-        return masterDao.getInArea(limit, offset, x1, y1, x2, y2)
+    override fun getInArea(limit: Int, offset: Int,
+                           prevX1: Double?, prevY1: Double?, prevX2: Double?, prevY2: Double?,
+                           x1: Double, y1: Double, x2: Double, y2: Double): List<Master> {
+        return masterDao.getInArea(limit, offset, prevX1, prevY1, prevX2, prevY2, x1, y1, x2, y2)
     }
 }

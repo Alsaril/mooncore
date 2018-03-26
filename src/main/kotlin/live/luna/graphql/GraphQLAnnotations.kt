@@ -150,11 +150,11 @@ private fun processEntity(isField: Boolean, member: AccessibleObject, context: P
     return graphQLField.build()
 }
 
-private data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any>)
+private data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any?>)
 
 private fun processParameters(method: Method): MethodSignatureHolder {
     val arguments = mutableListOf<GraphQLArgument>()
-    val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any>()
+    val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any?>()
 
     val sourceKlass = method.declaringClass
     method.parameters.forEach {
@@ -182,7 +182,7 @@ private fun processParameters(method: Method): MethodSignatureHolder {
 
 private class EnvironmentWrapper(private val environment: DataFetchingEnvironment, klass: Klass) {
     val source: Any = environment.getSource() ?: klass.newInstance()
-    operator fun invoke(name: String): Any = environment.getArgument<Any>(name)
+    operator fun invoke(name: String): Any? = environment.getArgument<Any?>(name)
 }
 
 private fun getInputType(klass: Klass): GraphQLInputType = when (klass) {
@@ -190,7 +190,7 @@ private fun getInputType(klass: Klass): GraphQLInputType = when (klass) {
     Long::class.java -> GraphQLLong
     String::class.java -> GraphQLString
     Boolean::class.java -> GraphQLBoolean
-    Double::class.java -> GraphQLFloat
+    Double::class.java, java.lang.Double::class.java -> GraphQLFloat
     else -> throw GraphQLSchemaBuilderException("Unknown input type ${klass.name}")
 }
 
