@@ -16,7 +16,7 @@ data class MetroLine(
         @Column(name = "color", nullable = false)
         val color: String,
 
-        @OneToMany(mappedBy = "line", cascade = [(CascadeType.ALL)])
+        @OneToMany(mappedBy = "line", cascade = [CascadeType.ALL])
         val stations: List<MetroStation>
 ) {
     constructor() : this(name = "", color = "", stations = ArrayList())

@@ -15,7 +15,7 @@ data class User(
         @GraphQLField
         val id: Long = 0,
 
-        @Column(name = "email", nullable = false)
+        @Column(name = "email", unique = true, nullable = false)
         @GraphQLField
         val email: String,
 
