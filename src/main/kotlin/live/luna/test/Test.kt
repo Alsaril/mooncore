@@ -1,5 +1,7 @@
 package live.luna.test
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
 import graphql.ExecutionInput.newExecutionInput
 import live.luna.Application.Companion.graphQL
 import org.springframework.web.bind.annotation.PostMapping
@@ -22,8 +24,10 @@ class HelloController {
         return executionResult.getData() ?: executionResult.errors
     }
 
-    class GraphQLRequest {
-        lateinit var query: String
-        lateinit var variables: Map<String, Any>
-    }
+    class GraphQLRequest @JsonCreator constructor(
+            @JsonProperty("query")
+            val query: String,
+            @JsonProperty("variables")
+            val variables: Map<String, Any>
+    )
 }
