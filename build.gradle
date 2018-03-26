@@ -42,6 +42,8 @@ dependencies {
     compile "org.hibernate:hibernate-core:5.2.15.Final"
 
     compile "javax.xml.bind:jaxb-api:2.3.0"
+    compile "io.jsonwebtoken:jjwt:0.9.0"
+    compile "org.mindrot:jbcrypt:0.3m"
 }
 
 compileKotlin {
