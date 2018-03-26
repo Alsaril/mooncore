@@ -32,6 +32,10 @@ class MasterServiceImpl : MasterService {
         return masterDao.getList(limit, offset)
     }
 
+    override fun getByEmail(email: String): Master? {
+        return masterDao.getByEmail(email)
+    }
+
     override fun getInArea(limit: Int, offset: Int,
                            prevX1: Double?, prevY1: Double?, prevX2: Double?, prevY2: Double?,
                            x1: Double, y1: Double, x2: Double, y2: Double): List<Master> {

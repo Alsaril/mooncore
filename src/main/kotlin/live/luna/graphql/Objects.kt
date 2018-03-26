@@ -12,6 +12,11 @@ class Query {
         return masterService.getById(id)
     }
 
+    @GraphQLField(nullable = true)
+    fun masterByEmail(@Argument("email") email: String): Master? {
+        return masterService.getByEmail(email)
+    }
+
     @GraphQLField(of = Master::class)
     fun mastersInArea(
             @Argument("limit") limit: Int,
