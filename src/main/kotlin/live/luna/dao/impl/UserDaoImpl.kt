@@ -30,4 +30,16 @@ class UserDaoImpl : UserDao {
     override fun getById(id: Long): User? {
         return em.find(User::class.java, id)
     }
+
+
+    override fun getByEmail(email: String): User? {
+        val cb = em.criteriaBuilder
+        val query = cb.createQuery(User::class.java)
+
+        val root = query.from(User::class.java)
+        query.select(root)
+                .where(cb.equal(root.get<String>("email"), email))
+
+        return em.createQuery(query).singleResult
+    }
 }

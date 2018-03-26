@@ -31,8 +31,4 @@ class MasterServiceImpl : MasterService {
     override fun getList(limit: Int, offset: Int): List<Master> {
         return masterDao.getList(limit, offset)
     }
-
-    override fun getByEmail(email: String): Master? {
-        return masterDao.getByEmail(email)
-    }
 }

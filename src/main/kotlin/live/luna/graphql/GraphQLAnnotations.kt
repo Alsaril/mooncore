@@ -8,6 +8,7 @@ import java.lang.reflect.Field
 import java.lang.reflect.Member
 import java.lang.reflect.Method
 import java.util.*
+import java.util.function.Supplier
 import kotlin.reflect.KClass
 
 // могут быть проблемы с одинаково названными типами
@@ -37,8 +38,28 @@ annotation class GraphQLField(
 annotation class Argument(
         val name: String,
         val description: String = "",
-        val nullable: Boolean = false
+        val nullable: Boolean = false,
+        val default: KClass<out Supplier<out Any>> = DefaultSupplier::class
 )
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@MustBeDocumented
+@Retention
+annotation class GraphQLContext
+
+@Target(AnnotationTarget.FUNCTION)
+@MustBeDocumented
+@Retention
+annotation class GraphQLUnion(
+        val name: String = "",
+        val description: String = "",
+        val nullable: Boolean = false,
+        val types: Array<KClass<out Any>> = []
+)
+
+private class DefaultSupplier : Supplier<Unit> {
+    override fun get() = Unit
+}
 
 enum class GraphQLModifier {
     NOT_NULL, LIST
@@ -159,6 +180,7 @@ private fun processParameters(method: Method): MethodSignatureHolder {
     val sourceKlass = method.declaringClass
     method.parameters.forEach {
         val parameterAnnotation = it.getAnnotation(Argument::class.java)
+        val contextAnnotation = it.getAnnotation(GraphQLContext::class.java)
         when {
             parameterAnnotation != null -> {
                 val name = parameterAnnotation.name
@@ -173,15 +195,19 @@ private fun processParameters(method: Method): MethodSignatureHolder {
                 arguments.add(argument.build())
                 argumentInjectors.add { env -> env(name) }
             }
+            contextAnnotation != null -> argumentInjectors.add { env -> env.context }
             it.type == sourceKlass -> argumentInjectors.add { env -> env.source }
+            it.type == DataFetchingEnvironment::class.java -> argumentInjectors.add { env -> env.environment }
             else -> throw GraphQLSchemaBuilderException("Parameter ${it.type} in method ${method.name} cannot be injected")
         }
     }
     return MethodSignatureHolder(arguments.toList(), argumentInjectors.toList())
 }
 
-private class EnvironmentWrapper(private val environment: DataFetchingEnvironment, klass: Klass) {
+private class EnvironmentWrapper(val environment: DataFetchingEnvironment, klass: Klass) {
     val source: Any = environment.getSource() ?: klass.newInstance()
+    val context: Any = environment.getContext()
+            ?: throw NullPointerException("Context hasn't been set, but is requested")
     operator fun invoke(name: String): Any = environment.getArgument<Any>(name)
 }
 
@@ -193,5 +219,5 @@ private fun getInputType(klass: Klass): GraphQLInputType = when (klass) {
     else -> throw GraphQLSchemaBuilderException("Unknown input type ${klass.name}")
 }
 
-inline fun String.ifEmptyThen(default: String) = if (!isEmpty()) this else default
+inline fun String.ifEmptyThen(default: String) = ifEmptyThenNull() ?: default
 inline fun String.ifEmptyThenNull() = if (!isEmpty()) this else null
