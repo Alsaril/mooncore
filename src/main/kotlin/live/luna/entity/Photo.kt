@@ -18,11 +18,11 @@ data class Photo(
         @GraphQLField
         val path: String,
 
-        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @ManyToMany(cascade = [CascadeType.ALL])
         @JoinTable(
                 name = "photo_tag",
-                joinColumns = [(JoinColumn(name = "photo_id"))],
-                inverseJoinColumns = [(JoinColumn(name = "tag_id"))]
+                joinColumns = [JoinColumn(name = "photo_id")],
+                inverseJoinColumns = [JoinColumn(name = "tag_id")]
         )
         @GraphQLField(of = Tag::class)
         val tags: List<Tag>

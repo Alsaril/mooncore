@@ -37,20 +37,20 @@ data class Service(
         @GraphQLField
         val ctime: Date = Date(),
 
-        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @ManyToMany(cascade = [CascadeType.ALL])
         @JoinTable(
                 name = "service_material",
-                joinColumns = [(JoinColumn(name = "service_id"))],
-                inverseJoinColumns = [(JoinColumn(name = "material_id"))]
+                joinColumns = [JoinColumn(name = "service_id")],
+                inverseJoinColumns = [JoinColumn(name = "material_id")]
         )
         @GraphQLField(of = Material::class)
         val materials: List<Material>,
 
-        @ManyToMany(cascade = [(CascadeType.ALL)])
+        @ManyToMany(cascade = [CascadeType.ALL])
         @JoinTable(
                 name = "service_photo",
-                joinColumns = [(JoinColumn(name = "service_id"))],
-                inverseJoinColumns = [(JoinColumn(name = "photo_id"))]
+                joinColumns = [JoinColumn(name = "service_id")],
+                inverseJoinColumns = [JoinColumn(name = "photo_id")]
         )
         @GraphQLField(of = Photo::class)
         val photos: List<Photo>

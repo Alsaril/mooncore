@@ -2,7 +2,6 @@ package live.luna.dao.impl
 
 import live.luna.dao.MasterDao
 import live.luna.entity.Master
-import live.luna.entity.User
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
@@ -30,21 +29,6 @@ class MasterDaoImpl : MasterDao {
 
     override fun getById(id: Long): Master? {
         return em.find(Master::class.java, id)
-    }
-
-    override fun getByEmail(email: String): Master? {
-        val query = em.criteriaBuilder.createQuery(Master::class.java)
-
-        val root = query.from(Master::class.java)
-        val join = root.join<Master, User>("user")
-        query
-                .select(root)
-                .where(em.criteriaBuilder.equal(join.get<User>("email"), email))
-
-        return em.createQuery(query)
-                .resultList
-                .takeIf { it.isNotEmpty() }
-                ?.let { return it[0] }
     }
 
     override fun getList(limit: Int, offset: Int): List<Master> {
