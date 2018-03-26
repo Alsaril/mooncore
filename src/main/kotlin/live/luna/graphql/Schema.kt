@@ -41,16 +41,16 @@ class Query {
     fun mastersInArea(
             @Argument("limit") limit: Int,
             @Argument("offset") offset: Int,
-            @Argument("x1") x1: Double,
-            @Argument("y1") y1: Double,
-            @Argument("x2") x2: Double,
-            @Argument("y2") y2: Double,
-            @Argument("prevX1", nullable = true) prevX1: Double?,
-            @Argument("prevY1", nullable = true) prevY1: Double?,
-            @Argument("prevX2", nullable = true) prevX2: Double?,
-            @Argument("prevY2", nullable = true) prevY2: Double?): List<Master> {
+            @Argument("lat1") lat1: Double,
+            @Argument("lon1") lon1: Double,
+            @Argument("lat2") lat2: Double,
+            @Argument("lon2") lon2: Double,
+            @Argument("prevLat1", nullable = true) prevLat1: Double?,
+            @Argument("prevLon1", nullable = true) prevLon1: Double?,
+            @Argument("prevLat2", nullable = true) prevLat2: Double?,
+            @Argument("prevLon2", nullable = true) prevLon2: Double?): List<Master> {
 
-        return masterService.getInArea(limit, offset, prevX1, prevY1, prevX2, prevY2, x1, y1, x2, y2)
+        return masterService.getInArea(limit, offset, prevLat1, prevLon1, prevLat2, prevLon2, lat1, lon1, lat2, lon2)
     }
 
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])

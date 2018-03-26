@@ -51,52 +51,52 @@ class MasterDaoImpl : MasterDao {
     /**
      *  Getting list of masters in given area. Optionally you can pass previous area coordinates to exclude some data
      */
-    override fun getInArea(limit: Int, offset: Int,
-                           prevX1: Double?, prevY1: Double?, prevX2: Double?, prevY2: Double?,
-                           x1: Double, y1: Double, x2: Double, y2: Double): List<Master> {
+    override fun getInArea(limit: Int,
+                           offset: Int,
+                           prevLat1: Double?,
+                           prevLon1: Double?,
+                           prevLat2: Double?,
+                           prevLon2: Double?,
+                           lat1: Double,
+                           lon1: Double,
+                           lat2: Double,
+                           lon2: Double): List<Master> {
 
-        if (x1 == x2 || y1 == y2) {
+        if (lat1 == lat2 || lon1 == lon2) {
             return emptyList()
         }
 
-        if (x1 > x2) {
-            return getInArea(limit, offset, prevX1, prevY1, prevX2, prevY2, x2, y2, x1, y1)
+        if (lat1 > lat2) {
+            return getInArea(limit, offset, prevLat1, prevLon1, prevLat2, prevLon2, lat2, lon2, lat1, lon1)
         }
 
-        if (prevX1 != null && prevX2 != null && prevX1 > prevX2) {
-            return getInArea(limit, offset, prevX2, prevY2, prevX1, prevY1, x1, y1, x2, y2)
+        if (prevLat1 != null && prevLat2 != null && prevLat1 > prevLat2) {
+            return getInArea(limit, offset, prevLat2, prevLon2, prevLat1, prevLon1, lat1, lon1, lat2, lon2)
         }
 
         val criteriaQuery = em.criteriaBuilder.createQuery(Master::class.java)
         val root = criteriaQuery.from(Master::class.java)
         val join = root.join<Master, Address>("address")
 
-        val select =
-                if (prevX1 != null && prevX2 != null && prevY1 != null && prevY2 != null) {
-                    criteriaQuery
-                            .select(root)
-                            .where(
-                                    em.criteriaBuilder.or(
-                                            em.criteriaBuilder.lt(join.get("lat"), prevX1),
-                                            em.criteriaBuilder.gt(join.get("lat"), prevX2),
-                                            em.criteriaBuilder.lt(join.get("lon"), Math.min(prevY1, prevY2)),
-                                            em.criteriaBuilder.gt(join.get("lon"), Math.max(prevY1, prevY2))
-                                    ),
-                                    em.criteriaBuilder.ge(join.get("lat"), x1),
-                                    em.criteriaBuilder.le(join.get("lat"), x2),
-                                    em.criteriaBuilder.ge(join.get("lon"), Math.min(y1, y2)),
-                                    em.criteriaBuilder.le(join.get("lon"), Math.max(y1, y2))
-                            )
-                } else {
-                    criteriaQuery
-                            .select(root)
-                            .where(
-                                    em.criteriaBuilder.ge(join.get("lat"), x1),
-                                    em.criteriaBuilder.le(join.get("lat"), x2),
-                                    em.criteriaBuilder.ge(join.get("lon"), Math.min(y1, y2)),
-                                    em.criteriaBuilder.le(join.get("lon"), Math.max(y1, y2))
-                            )
-                }
+        var select = criteriaQuery.select(root)
+
+        if (prevLat1 != null && prevLat2 != null && prevLon1 != null && prevLon2 != null) {
+            select = select.where(
+                    em.criteriaBuilder.or(
+                            em.criteriaBuilder.lt(join.get("lat"), prevLat1),
+                            em.criteriaBuilder.gt(join.get("lat"), prevLat2),
+                            em.criteriaBuilder.lt(join.get("lon"), Math.min(prevLon1, prevLon2)),
+                            em.criteriaBuilder.gt(join.get("lon"), Math.max(prevLon1, prevLon2))
+                    )
+            )
+        }
+
+        select = select.where(
+                em.criteriaBuilder.ge(join.get("lat"), lat1),
+                em.criteriaBuilder.le(join.get("lat"), lat2),
+                em.criteriaBuilder.ge(join.get("lon"), Math.min(lon1, lon2)),
+                em.criteriaBuilder.le(join.get("lon"), Math.max(lon1, lon2))
+        )
 
         val typedQuery = em.createQuery(select)
         typedQuery.firstResult = offset
