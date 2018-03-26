@@ -19,7 +19,7 @@ data class Master(
         val name: String,
 
         @OneToOne
-        @JoinColumn(name = "user_id", nullable = false)
+        @JoinColumn(name = "user_id", unique = true, nullable = false)
         @GraphQLField
         val user: User,
 

@@ -8,4 +8,5 @@ interface MasterService {
     fun delete(master: Master)
     fun getById(id: Long): Master?
     fun getList(limit: Int, offset: Int): List<Master>
+    fun getByEmail(email: String): Master?
 }

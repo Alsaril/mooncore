@@ -11,4 +11,9 @@ class Query {
     fun master(@Argument("id") id: Long): Master? {
         return masterService.getById(id)
     }
+
+    @GraphQLField(nullable = true)
+    fun masterByEmail(@Argument("email") email: String): Master? {
+        return masterService.getByEmail(email)
+    }
 }
