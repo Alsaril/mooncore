@@ -32,6 +32,11 @@ class Query {
         return masterService.getById(id)
     }
 
+    @GraphQLField(of = Master::class)
+    fun feed(@Argument("limit") limit: Int, @Argument("offset") offset: Int): List<Master> {
+        return masterService.getList(limit, offset)
+    }
+
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])
     fun viewer(@GraphQLContext context: UserContext): Any? {
         return null
