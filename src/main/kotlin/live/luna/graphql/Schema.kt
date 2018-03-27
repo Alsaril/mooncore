@@ -2,6 +2,7 @@ package live.luna.graphql
 
 import live.luna.entity.Master
 import live.luna.entity.User
+import live.luna.graphql.annotations.*
 import live.luna.service.MasterService
 import live.luna.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
@@ -24,17 +25,24 @@ class Initter
 
 class UserContext(val user: User?)
 
+class Limit @GraphQLInputObject constructor(
+        @GraphQLInputField("offset")
+        var offset: Int = 0,
+        @GraphQLInputField("limit")
+        var limit: Int = 0
+)
+
 @GraphQLObject
 class Query {
     @GraphQLField(nullable = true)
-    fun master(@Argument(name = "id") id: Long, @GraphQLContext context: UserContext): Master? {
+    fun master(@GraphQLArgument(name = "id") id: Long, @GraphQLContext context: UserContext): Master? {
         context.user
         return masterService.getById(id)
     }
 
     @GraphQLField(of = Master::class)
-    fun feed(@Argument("limit") limit: Int, @Argument("offset") offset: Int): List<Master> {
-        return masterService.getList(limit, offset)
+    fun feed(@GraphQLArgument("limit") limit: Limit): List<Master> {
+        return masterService.getList(limit.limit, limit.offset)
     }
 
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])
@@ -46,16 +54,16 @@ class Query {
 @GraphQLObject
 class Mutation {
     @GraphQLField
-    fun createUser(@Argument("email") email: String,
-                   @Argument("password") password: String,
-                   @Argument("name") name: String,
-                   @Argument("role") role: Int): User? {
+    fun createUser(@GraphQLArgument("email") email: String,
+                   @GraphQLArgument("password") password: String,
+                   @GraphQLArgument("name") name: String,
+                   @GraphQLArgument("role") role: Int): User? {
         return userService.createUser(email, password, name, role)
     }
 
     @GraphQLField
-    fun token(@Argument("email") email: String,
-              @Argument("password") password: String): String? {
+    fun token(@GraphQLArgument("email") email: String,
+              @GraphQLArgument("password") password: String): String? {
         return userService.token(email, password)
     }
 
