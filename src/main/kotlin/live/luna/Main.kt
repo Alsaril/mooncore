@@ -5,7 +5,7 @@ import live.luna.auth.AuthHelper
 import live.luna.auth.AuthInterceptor
 import live.luna.graphql.Mutation
 import live.luna.graphql.Query
-import live.luna.graphql.buildSchema
+import live.luna.graphql.annotations.buildSchema
 import live.luna.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.SpringApplication
