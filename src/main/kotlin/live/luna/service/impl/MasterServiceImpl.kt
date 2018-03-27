@@ -2,6 +2,8 @@ package live.luna.service.impl
 
 import live.luna.dao.MasterDao
 import live.luna.entity.Master
+import live.luna.graphql.Area
+import live.luna.graphql.Limit
 import live.luna.service.MasterService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -28,7 +30,7 @@ class MasterServiceImpl : MasterService {
         return masterDao.getById(id)
     }
 
-    override fun getList(limit: Int, offset: Int): List<Master> {
-        return masterDao.getList(limit, offset)
+    override fun getList(limit: Limit, area: Area?, prevArea: Area?): List<Master> {
+        return masterDao.getList(limit, area, prevArea)
     }
 }

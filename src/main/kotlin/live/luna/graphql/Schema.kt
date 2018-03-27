@@ -25,24 +25,46 @@ class Initter
 
 class UserContext(val user: User?)
 
-class Limit @GraphQLInputObject constructor(
+class Limit
+@GraphQLInputObject
+constructor(
         @GraphQLInputField("offset")
         var offset: Int = 0,
         @GraphQLInputField("limit")
         var limit: Int = 0
 )
 
+
+class Point
+@GraphQLInputObject
+constructor(
+        @GraphQLInputField("lat")
+        var lat: Double,
+        @GraphQLInputField("lon")
+        var lon: Double
+)
+
+class Area
+@GraphQLInputObject
+constructor(
+        @GraphQLInputField("from")
+        var from: Point,
+        @GraphQLInputField("to")
+        var to: Point
+)
+
 @GraphQLObject
 class Query {
     @GraphQLField(nullable = true)
     fun master(@GraphQLArgument(name = "id") id: Long, @GraphQLContext context: UserContext): Master? {
-        context.user
         return masterService.getById(id)
     }
 
     @GraphQLField(of = Master::class)
-    fun feed(@GraphQLArgument("limit") limit: Limit): List<Master> {
-        return masterService.getList(limit.limit, limit.offset)
+    fun feed(@GraphQLArgument("limit") limit: Limit,
+             @GraphQLArgument("area", nullable = true) area: Area?,
+             @GraphQLArgument("prevArea", nullable = true) prevArea: Area?): List<Master> {
+        return masterService.getList(limit, area, prevArea)
     }
 
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])
