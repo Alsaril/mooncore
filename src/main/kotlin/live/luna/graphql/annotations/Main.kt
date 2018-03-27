@@ -140,10 +140,10 @@ private fun getInputType(klass: Klass, context: ProcessorContext): InputTypeWrap
         params.add(creator)
     }
 
-    val creator: InputObjectCreator = { name, map ->
+    val creator: InputObjectCreator = { _, map ->
         c.newInstance(*params.map {
-            val subObject = (map as Map<String, Any>)[it.first]!!
-            it.second?.invoke(it.first, subObject) ?: subObject
+            (map as Map<String, Any>)[it.first]
+                    ?.let { sb -> it.second?.invoke(it.first, sb) ?: sb }
         }.toTypedArray())
     }
 

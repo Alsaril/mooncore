@@ -25,40 +25,46 @@ class Initter
 
 class UserContext(val user: User?)
 
-class Limit @GraphQLInputObject constructor(
+class Limit
+@GraphQLInputObject
+constructor(
         @GraphQLInputField("offset")
         var offset: Int = 0,
         @GraphQLInputField("limit")
         var limit: Int = 0
 )
 
+
+class Point
+@GraphQLInputObject
+constructor(
+        @GraphQLInputField("lat")
+        var lat: Double,
+        @GraphQLInputField("lon")
+        var lon: Double
+)
+
+class Area
+@GraphQLInputObject
+constructor(
+        @GraphQLInputField("from")
+        var from: Point,
+        @GraphQLInputField("to")
+        var to: Point
+)
+
 @GraphQLObject
 class Query {
     @GraphQLField(nullable = true)
     fun master(@GraphQLArgument(name = "id") id: Long, @GraphQLContext context: UserContext): Master? {
-        context.user
         return masterService.getById(id)
     }
 
     @GraphQLField(of = Master::class)
-    fun feed(@GraphQLArgument("limit") limit: Limit): List<Master> {
-        return masterService.getList(limit.limit, limit.offset)
-    }
-
-    @GraphQLField(of = Master::class)
-    fun mastersInArea(
-            @Argument("limit") limit: Int,
-            @Argument("offset") offset: Int,
-            @Argument("lat1") lat1: Double,
-            @Argument("lon1") lon1: Double,
-            @Argument("lat2") lat2: Double,
-            @Argument("lon2") lon2: Double,
-            @Argument("prevLat1", nullable = true) prevLat1: Double?,
-            @Argument("prevLon1", nullable = true) prevLon1: Double?,
-            @Argument("prevLat2", nullable = true) prevLat2: Double?,
-            @Argument("prevLon2", nullable = true) prevLon2: Double?): List<Master> {
-
-        return masterService.getInArea(limit, offset, prevLat1, prevLon1, prevLat2, prevLon2, lat1, lon1, lat2, lon2)
+    fun feed(@GraphQLArgument("limit") limit: Limit,
+             @GraphQLArgument("area", nullable = true) area: Area?,
+             @GraphQLArgument("prevArea", nullable = true) prevArea: Area?): List<Master> {
+        return masterService.getList(limit, area, prevArea)
     }
 
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])

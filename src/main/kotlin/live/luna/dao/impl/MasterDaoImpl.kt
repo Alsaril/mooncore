@@ -3,10 +3,13 @@ package live.luna.dao.impl
 import live.luna.dao.MasterDao
 import live.luna.entity.Address
 import live.luna.entity.Master
+import live.luna.graphql.Area
+import live.luna.graphql.Limit
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
+import javax.persistence.criteria.Predicate
 
 
 @Repository
@@ -32,75 +35,49 @@ class MasterDaoImpl : MasterDao {
         return em.find(Master::class.java, id)
     }
 
-    override fun getList(limit: Int, offset: Int): List<Master> {
-        if (limit <= 0 || offset < 0) {
+    override fun getList(limit: Limit, area: Area?, prevArea: Area?): List<Master> {
+        if (limit.limit <= 0 || limit.offset < 0) {
             return emptyList()
         }
 
-        val criteriaQuery = em.criteriaBuilder.createQuery(Master::class.java)
-        val from = criteriaQuery.from(Master::class.java)
-        val select = criteriaQuery.select(from)
-
-        val typedQuery = em.createQuery(select)
-        typedQuery.firstResult = offset
-        typedQuery.maxResults = limit
-
-        return typedQuery.resultList
-    }
-
-    /**
-     *  Getting list of masters in given area. Optionally you can pass previous area coordinates to exclude some data
-     */
-    override fun getInArea(limit: Int,
-                           offset: Int,
-                           prevLat1: Double?,
-                           prevLon1: Double?,
-                           prevLat2: Double?,
-                           prevLon2: Double?,
-                           lat1: Double,
-                           lon1: Double,
-                           lat2: Double,
-                           lon2: Double): List<Master> {
-
-        if (lat1 == lat2 || lon1 == lon2) {
-            return emptyList()
+        if (area != null && area.from.lat > area.to.lat) {
+            area.from = area.to.also { area.to = area.from }
+            return getList(limit, area, prevArea)
         }
 
-        if (lat1 > lat2) {
-            return getInArea(limit, offset, prevLat1, prevLon1, prevLat2, prevLon2, lat2, lon2, lat1, lon1)
-        }
-
-        if (prevLat1 != null && prevLat2 != null && prevLat1 > prevLat2) {
-            return getInArea(limit, offset, prevLat2, prevLon2, prevLat1, prevLon1, lat1, lon1, lat2, lon2)
+        if (prevArea != null && prevArea.from.lat > prevArea.to.lat) {
+            prevArea.from = prevArea.to.also { prevArea.to = prevArea.from }
+            return getList(limit, area, prevArea)
         }
 
         val criteriaQuery = em.criteriaBuilder.createQuery(Master::class.java)
         val root = criteriaQuery.from(Master::class.java)
         val join = root.join<Master, Address>("address")
+        val predicates = mutableListOf<Predicate>()
+        val cb = em.criteriaBuilder
 
-        var select = criteriaQuery.select(root)
-
-        if (prevLat1 != null && prevLat2 != null && prevLon1 != null && prevLon2 != null) {
-            select = select.where(
-                    em.criteriaBuilder.or(
-                            em.criteriaBuilder.lt(join.get("lat"), prevLat1),
-                            em.criteriaBuilder.gt(join.get("lat"), prevLat2),
-                            em.criteriaBuilder.lt(join.get("lon"), Math.min(prevLon1, prevLon2)),
-                            em.criteriaBuilder.gt(join.get("lon"), Math.max(prevLon1, prevLon2))
-                    )
-            )
+        area?.let {
+            predicates.apply {
+                add(cb.ge(join.get("lat"), area.from.lat))
+                add(cb.le(join.get("lat"), area.to.lat))
+                add(cb.ge(join.get("lon"), Math.min(area.from.lon, area.to.lon)))
+                add(cb.le(join.get("lon"), Math.max(area.from.lon, area.to.lon)))
+            }
         }
 
-        select = select.where(
-                em.criteriaBuilder.ge(join.get("lat"), lat1),
-                em.criteriaBuilder.le(join.get("lat"), lat2),
-                em.criteriaBuilder.ge(join.get("lon"), Math.min(lon1, lon2)),
-                em.criteriaBuilder.le(join.get("lon"), Math.max(lon1, lon2))
-        )
+        prevArea?.let {
+            val l = listOf<Predicate>(
+                    cb.lt(join.get("lat"), prevArea.from.lat),
+                    cb.gt(join.get("lat"), prevArea.to.lat),
+                    cb.lt(join.get("lon"), Math.min(prevArea.from.lon, prevArea.to.lon)),
+                    cb.gt(join.get("lon"), Math.max(prevArea.from.lon, prevArea.to.lon))
+            )
+            predicates.add(cb.or(*l.toTypedArray()))
+        }
 
-        val typedQuery = em.createQuery(select)
-        typedQuery.firstResult = offset
-        typedQuery.maxResults = limit
+        val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
+        typedQuery.firstResult = limit.offset
+        typedQuery.maxResults = limit.limit
         return typedQuery.resultList
     }
 }
