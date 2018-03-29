@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 class HelloController {
 
-    @PostMapping("/")
+    @PostMapping("/api/graphql")
     fun index(@RequestBody body: GraphQLRequest, request: HttpServletRequest): Any {
 
         val executionInput = newExecutionInput()
