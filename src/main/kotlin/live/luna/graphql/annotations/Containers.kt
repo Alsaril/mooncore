@@ -3,7 +3,8 @@ package live.luna.graphql.annotations
 import graphql.Scalars
 import graphql.schema.*
 import graphql.schema.GraphQLArgument
-import java.util.*
+import java.math.BigDecimal
+import java.math.BigInteger
 
 data class InputTypeWrapper(val type: GraphQLInputType, val creator: InputObjectCreator? = null)
 
@@ -16,18 +17,41 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         knownInputTypes[java.lang.Boolean::class.java] = InputTypeWrapper(Scalars.GraphQLBoolean)
         knownInputTypes[Byte::class.java] = InputTypeWrapper(Scalars.GraphQLByte)
         knownInputTypes[java.lang.Byte::class.java] = InputTypeWrapper(Scalars.GraphQLByte)
+        knownInputTypes[Short::class.java] = InputTypeWrapper(Scalars.GraphQLShort)
+        knownInputTypes[java.lang.Short::class.java] = InputTypeWrapper(Scalars.GraphQLShort)
+        knownInputTypes[Char::class.java] = InputTypeWrapper(Scalars.GraphQLChar)
+        knownInputTypes[java.lang.Character::class.java] = InputTypeWrapper(Scalars.GraphQLChar)
         knownInputTypes[Int::class.java] = InputTypeWrapper(Scalars.GraphQLInt)
         knownInputTypes[java.lang.Integer::class.java] = InputTypeWrapper(Scalars.GraphQLInt)
         knownInputTypes[Long::class.java] = InputTypeWrapper(Scalars.GraphQLLong)
         knownInputTypes[java.lang.Long::class.java] = InputTypeWrapper(Scalars.GraphQLLong)
+        knownInputTypes[Float::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
+        knownInputTypes[java.lang.Float::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
+        knownInputTypes[Double::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
+        knownInputTypes[java.lang.Double::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
         knownInputTypes[String::class.java] = InputTypeWrapper(Scalars.GraphQLString)
+        knownInputTypes[BigDecimal::class.java] = InputTypeWrapper(Scalars.GraphQLBigDecimal)
+        knownInputTypes[BigInteger::class.java] = InputTypeWrapper(Scalars.GraphQLBigInteger)
 
-        knownOutputTypes[Int::class.java] = Scalars.GraphQLInt
-        knownOutputTypes[Long::class.java] = Scalars.GraphQLLong
-        knownOutputTypes[String::class.java] = Scalars.GraphQLString
         knownOutputTypes[Boolean::class.java] = Scalars.GraphQLBoolean
+        knownOutputTypes[java.lang.Boolean::class.java] = Scalars.GraphQLBoolean
+        knownOutputTypes[Byte::class.java] = Scalars.GraphQLByte
+        knownOutputTypes[java.lang.Byte::class.java] = Scalars.GraphQLByte
+        knownOutputTypes[Short::class.java] = Scalars.GraphQLShort
+        knownOutputTypes[java.lang.Short::class.java] = Scalars.GraphQLShort
+        knownOutputTypes[Char::class.java] = Scalars.GraphQLChar
+        knownOutputTypes[java.lang.Character::class.java] = Scalars.GraphQLChar
+        knownOutputTypes[Int::class.java] = Scalars.GraphQLInt
+        knownOutputTypes[java.lang.Integer::class.java] = Scalars.GraphQLInt
+        knownOutputTypes[Long::class.java] = Scalars.GraphQLLong
+        knownOutputTypes[java.lang.Long::class.java] = Scalars.GraphQLLong
+        knownOutputTypes[Float::class.java] = Scalars.GraphQLFloat
+        knownOutputTypes[java.lang.Float::class.java] = Scalars.GraphQLFloat
         knownOutputTypes[Double::class.java] = Scalars.GraphQLFloat
-        knownOutputTypes[Date::class.java] = Scalars.GraphQLString
+        knownOutputTypes[java.lang.Double::class.java] = Scalars.GraphQLFloat
+        knownOutputTypes[String::class.java] = Scalars.GraphQLString
+        knownOutputTypes[BigDecimal::class.java] = Scalars.GraphQLBigDecimal
+        knownOutputTypes[BigInteger::class.java] = Scalars.GraphQLBigInteger
     }
 
     fun getInputType(klass: Klass): InputTypeWrapper? = knownInputTypes[klass]
