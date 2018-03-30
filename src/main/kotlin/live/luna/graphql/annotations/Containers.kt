@@ -5,6 +5,7 @@ import graphql.schema.*
 import graphql.schema.GraphQLArgument
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.util.*
 
 data class InputTypeWrapper(val type: GraphQLInputType, val creator: InputObjectCreator? = null)
 
@@ -52,6 +53,7 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         knownOutputTypes[String::class.java] = Scalars.GraphQLString
         knownOutputTypes[BigDecimal::class.java] = Scalars.GraphQLBigDecimal
         knownOutputTypes[BigInteger::class.java] = Scalars.GraphQLBigInteger
+        knownOutputTypes[Date::class.java] = Scalars.GraphQLString
     }
 
     fun getInputType(klass: Klass): InputTypeWrapper? = knownInputTypes[klass]
