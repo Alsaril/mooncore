@@ -83,7 +83,7 @@ private fun processEntity(isField: Boolean, member: AccessibleObject, context: P
 @Suppress("UNCHECKED_CAST")
 private fun processParameters(method: Method, context: ProcessorContext): MethodSignatureHolder {
     val arguments = mutableListOf<graphql.schema.GraphQLArgument>()
-    val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any>()
+    val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any?>()
 
     val sourceKlass = method.declaringClass
     method.parameters.forEach {

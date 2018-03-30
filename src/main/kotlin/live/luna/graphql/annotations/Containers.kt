@@ -80,14 +80,14 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
     }
 }
 
-internal data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any>)
+internal data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any?>)
 
 internal class EnvironmentWrapper(val environment: DataFetchingEnvironment, klass: Klass) {
     val source: Any = environment.getSource() ?: klass.newInstance()
     val context: Any = environment.getContext()
             ?: throw NullPointerException("Context hasn't been set, but is requested")
 
-    operator fun invoke(name: String): Any = environment.getArgument<Any>(name)
+    operator fun invoke(name: String): Any? = environment.getArgument<Any?>(name)
 }
 
 
