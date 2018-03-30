@@ -141,10 +141,12 @@ private fun getInputType(klass: Klass, context: ProcessorContext): InputTypeWrap
     }
 
     val creator: InputObjectCreator = { _, map ->
-        c.newInstance(*params.map {
+        map?.let {
+            c.newInstance(*params.map {
             (map as Map<String, Any>)[it.first]
                     ?.let { sb -> it.second?.invoke(it.first, sb) ?: sb }
-        }.toTypedArray())
+            }.toTypedArray())
+        }
     }
 
     val type = builder.build()
