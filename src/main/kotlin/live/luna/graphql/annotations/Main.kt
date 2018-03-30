@@ -83,7 +83,7 @@ private fun processEntity(isField: Boolean, member: AccessibleObject, context: P
 @Suppress("UNCHECKED_CAST")
 private fun processParameters(method: Method, context: ProcessorContext): MethodSignatureHolder {
     val arguments = mutableListOf<graphql.schema.GraphQLArgument>()
-    val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any>()
+    val argumentInjectors = mutableListOf<(EnvironmentWrapper) -> Any?>()
 
     val sourceKlass = method.declaringClass
     method.parameters.forEach {
@@ -141,10 +141,12 @@ private fun getInputType(klass: Klass, context: ProcessorContext): InputTypeWrap
     }
 
     val creator: InputObjectCreator = { _, map ->
-        c.newInstance(*params.map {
+        map?.let {
+            c.newInstance(*params.map {
             (map as Map<String, Any>)[it.first]
                     ?.let { sb -> it.second?.invoke(it.first, sb) ?: sb }
-        }.toTypedArray())
+            }.toTypedArray())
+        }
     }
 
     val type = builder.build()

@@ -29,9 +29,9 @@ class Limit
 @GraphQLInputObject
 constructor(
         @GraphQLInputField("offset")
-        var offset: Int = 0,
+        var offset: Int,
         @GraphQLInputField("limit")
-        var limit: Int = 0
+        var limit: Int
 )
 
 
