@@ -25,12 +25,12 @@ data class Master(
 
         @ManyToOne
         @JoinColumn(name = "address_id", nullable = true)
-        @GraphQLField
+        @GraphQLField(nullable = true)
         val address: Address? = null,
 
         @OneToOne
         @JoinColumn(name = "avatar_id", nullable = true)
-        @GraphQLField
+        @GraphQLField(nullable = true)
         val avatar: Photo? = null,
 
         @ManyToOne

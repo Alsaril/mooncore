@@ -25,7 +25,7 @@ data class Client(
 
         @ManyToOne
         @JoinColumn(name = "avatar_id", nullable = true)
-        @GraphQLField
+        @GraphQLField(nullable = true)
         val avatar: Photo? = null,
 
         @ManyToMany(cascade = [CascadeType.ALL])
