@@ -52,27 +52,27 @@ class MasterDaoImpl : MasterDao {
 
         val criteriaQuery = em.criteriaBuilder.createQuery(Master::class.java)
         val root = criteriaQuery.from(Master::class.java)
-        val join = root.join<Master, Address>("address")
         val predicates = mutableListOf<Predicate>()
         val cb = em.criteriaBuilder
 
         area?.let {
+            val join = root.join<Master, Address>("address")
             predicates.apply {
                 add(cb.ge(join.get("lat"), area.from.lat))
                 add(cb.le(join.get("lat"), area.to.lat))
                 add(cb.ge(join.get("lon"), Math.min(area.from.lon, area.to.lon)))
                 add(cb.le(join.get("lon"), Math.max(area.from.lon, area.to.lon)))
             }
-        }
 
-        prevArea?.let {
-            val l = listOf<Predicate>(
-                    cb.lt(join.get("lat"), prevArea.from.lat),
-                    cb.gt(join.get("lat"), prevArea.to.lat),
-                    cb.lt(join.get("lon"), Math.min(prevArea.from.lon, prevArea.to.lon)),
-                    cb.gt(join.get("lon"), Math.max(prevArea.from.lon, prevArea.to.lon))
-            )
-            predicates.add(cb.or(*l.toTypedArray()))
+            prevArea?.let {
+                val l = listOf<Predicate>(
+                        cb.lt(join.get("lat"), prevArea.from.lat),
+                        cb.gt(join.get("lat"), prevArea.to.lat),
+                        cb.lt(join.get("lon"), Math.min(prevArea.from.lon, prevArea.to.lon)),
+                        cb.gt(join.get("lon"), Math.max(prevArea.from.lon, prevArea.to.lon))
+                )
+                predicates.add(cb.or(*l.toTypedArray()))
+            }
         }
 
         val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
