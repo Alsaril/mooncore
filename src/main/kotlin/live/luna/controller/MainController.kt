@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest
 
 
 @RestController
-class HelloController {
+class MainController {
 
     @PostMapping("/api/graphql")
     fun index(@RequestBody body: GraphQLRequest, request: HttpServletRequest): Any {
@@ -24,8 +24,7 @@ class HelloController {
                 .variables(body.variables)
                 .context(UserContext(request.getAttribute(CONTEXT_USER_ATTRIBUTE) as User?))
 
-        val executionResult = graphQL.execute(executionInput.build())
-        return executionResult.getData() ?: executionResult.errors
+        return graphQL.execute(executionInput.build())
     }
 
     class GraphQLRequest
@@ -33,6 +32,6 @@ class HelloController {
             @JsonProperty("query")
             val query: String,
             @JsonProperty("variables")
-            val variables: Map<String, Any>
+            val variables: Map<String, Any>?
     )
 }
