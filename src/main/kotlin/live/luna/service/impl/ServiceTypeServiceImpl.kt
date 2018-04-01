@@ -27,4 +27,8 @@ class ServiceTypeServiceImpl : ServiceTypeService {
     override fun getById(id: Long): ServiceType? {
         return serviceTypeDao.getById(id)
     }
+
+    override fun getByName(name: String): ServiceType? {
+        return serviceTypeDao.getByName(name)
+    }
 }
