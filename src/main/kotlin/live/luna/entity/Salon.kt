@@ -24,14 +24,13 @@ data class Salon(
         val address: Address,
 
         @OneToOne
-        @JoinColumn(name = "photo_id", nullable = false)
+        @JoinColumn(name = "avatar_id", nullable = false)
         @GraphQLField
-        val photo: Photo,
+        val avatar: Photo,
 
-        @Column(name = "stars", nullable = false)
-        @GraphQLField
-        val stars: Int = 0
-
+        @OneToMany(mappedBy = "salon", cascade = [CascadeType.ALL])
+        @GraphQLField(of = Master::class)
+        val masters: List<Master>
 ) {
-    constructor() : this(address = Address(), photo = Photo(), name = "")
+    constructor() : this(address = Address(), avatar = Photo(), name = "", masters = emptyList())
 }
