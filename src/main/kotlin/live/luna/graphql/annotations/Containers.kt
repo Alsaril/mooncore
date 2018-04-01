@@ -24,8 +24,8 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         knownInputTypes[java.lang.Character::class.java] = InputTypeWrapper(Scalars.GraphQLChar)
         knownInputTypes[Int::class.java] = InputTypeWrapper(Scalars.GraphQLInt)
         knownInputTypes[java.lang.Integer::class.java] = InputTypeWrapper(Scalars.GraphQLInt)
-        knownInputTypes[Long::class.java] = InputTypeWrapper(Scalars.GraphQLLong)
-        knownInputTypes[java.lang.Long::class.java] = InputTypeWrapper(Scalars.GraphQLLong)
+        knownInputTypes[Long::class.java] = InputTypeWrapper(Scalars.GraphQLID)
+        knownInputTypes[java.lang.Long::class.java] = InputTypeWrapper(Scalars.GraphQLID)
         knownInputTypes[Float::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
         knownInputTypes[java.lang.Float::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
         knownInputTypes[Double::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
@@ -44,8 +44,8 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         knownOutputTypes[java.lang.Character::class.java] = Scalars.GraphQLChar
         knownOutputTypes[Int::class.java] = Scalars.GraphQLInt
         knownOutputTypes[java.lang.Integer::class.java] = Scalars.GraphQLInt
-        knownOutputTypes[Long::class.java] = Scalars.GraphQLLong
-        knownOutputTypes[java.lang.Long::class.java] = Scalars.GraphQLLong
+        knownOutputTypes[Long::class.java] = Scalars.GraphQLID
+        knownOutputTypes[java.lang.Long::class.java] = Scalars.GraphQLID
         knownOutputTypes[Float::class.java] = Scalars.GraphQLFloat
         knownOutputTypes[java.lang.Float::class.java] = Scalars.GraphQLFloat
         knownOutputTypes[Double::class.java] = Scalars.GraphQLFloat

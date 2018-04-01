@@ -25,7 +25,7 @@ class HelloController {
                 .context(UserContext(request.getAttribute(CONTEXT_USER_ATTRIBUTE) as User?))
 
         val executionResult = graphQL.execute(executionInput.build())
-        return executionResult.getData() ?: executionResult.errors
+        return Wrapper(executionResult.getData() ?: executionResult.errors)
     }
 
     class GraphQLRequest
@@ -33,6 +33,8 @@ class HelloController {
             @JsonProperty("query")
             val query: String,
             @JsonProperty("variables")
-            val variables: Map<String, Any>
+            val variables: Map<String, Any>?
     )
+
+    class Wrapper(val data: Any)
 }
