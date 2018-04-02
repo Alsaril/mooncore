@@ -1,6 +1,8 @@
 package live.luna.entity
 
+import live.luna.graphql.annotations.GraphQLComplexField
 import live.luna.graphql.annotations.GraphQLField
+import live.luna.graphql.annotations.GraphQLModifier
 import live.luna.graphql.annotations.GraphQLObject
 import javax.persistence.*
 
@@ -27,7 +29,7 @@ data class Sign(
         val description: String,
 
         @ManyToMany(mappedBy = "signs")
-        @GraphQLField(of = Master::class)
+        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Master::class)
         val masters: List<Master>
 ) {
         constructor() : this(name = "", icon = "", description = "", masters = ArrayList())
