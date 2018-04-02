@@ -1,6 +1,8 @@
 package live.luna.entity
 
+import live.luna.graphql.annotations.GraphQLComplexField
 import live.luna.graphql.annotations.GraphQLField
+import live.luna.graphql.annotations.GraphQLModifier
 import live.luna.graphql.annotations.GraphQLObject
 import javax.persistence.*
 
@@ -34,7 +36,7 @@ data class Client(
                 joinColumns = [JoinColumn(name = "client_id")],
                 inverseJoinColumns = [JoinColumn(name = "master_id")]
         )
-        @GraphQLField(of = Master::class)
+        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Master::class)
         val favorites: List<Master> = listOf()
 
 ) {
