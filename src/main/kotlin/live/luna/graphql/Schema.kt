@@ -1,27 +1,32 @@
 package live.luna.graphql
 
 import live.luna.entity.Master
+import live.luna.entity.ServiceType
 import live.luna.entity.User
 import live.luna.graphql.annotations.*
 import live.luna.graphql.annotations.GraphQLModifier.LIST
 import live.luna.graphql.annotations.GraphQLModifier.NOT_NULL
 import live.luna.service.MasterService
+import live.luna.service.ServiceTypeService
 import live.luna.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 lateinit var masterService: MasterService
 lateinit var userService: UserService
+lateinit var serviceTypeService: ServiceTypeService
 
 @Component
 class Initter
 @Autowired constructor(
         _masterService: MasterService,
-        _userService: UserService
+        _userService: UserService,
+        _serviceTypeService: ServiceTypeService
 ) {
     init {
         masterService = _masterService
         userService = _userService
+        serviceTypeService = _serviceTypeService
     }
 }
 
@@ -76,6 +81,11 @@ class Query {
     fun test(@GraphQLArgument("count") count: Int,
              @GraphQLComplexArgument("array", modifiers = [NOT_NULL, LIST, NOT_NULL], type = Point::class) array: List<Point>): List<Point> {
         return array
+    }
+
+    @GraphQLComplexField(modifiers = [NOT_NULL, LIST, NOT_NULL], type = ServiceType::class)
+    fun serviceTypes(): List<ServiceType> {
+        return serviceTypeService.getAll()
     }
 
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])
