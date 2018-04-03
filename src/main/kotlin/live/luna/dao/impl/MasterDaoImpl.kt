@@ -78,6 +78,7 @@ class MasterDaoImpl : MasterDao {
         }
 
         if (serviceTypes?.isNotEmpty() == true) {
+            // TODO optimize it to avoid distinct below
             val join = root.join<Master, Service>("services")
             predicates.add(join.get<Service>("type").get<Long>("id").`in`(serviceTypes))
         }
@@ -85,6 +86,6 @@ class MasterDaoImpl : MasterDao {
         val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
         typedQuery.firstResult = limit.offset
         typedQuery.maxResults = limit.limit
-        return typedQuery.resultList
+        return typedQuery.resultList.distinct()
     }
 }
