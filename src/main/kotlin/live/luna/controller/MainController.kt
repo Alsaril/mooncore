@@ -24,7 +24,8 @@ class MainController {
                 .variables(body.variables)
                 .context(UserContext(request.getAttribute(CONTEXT_USER_ATTRIBUTE) as User?))
 
-        return graphQL.execute(executionInput.build())
+        val executionResult = graphQL.execute(executionInput.build())
+        return Wrapper(executionResult.getData() ?: executionResult.errors)
     }
 
     class GraphQLRequest
@@ -34,4 +35,6 @@ class MainController {
             @JsonProperty("variables")
             val variables: Map<String, Any>?
     )
+
+    class Wrapper(val data: Any)
 }

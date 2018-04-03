@@ -3,6 +3,8 @@ package live.luna.graphql
 import live.luna.entity.Master
 import live.luna.entity.User
 import live.luna.graphql.annotations.*
+import live.luna.graphql.annotations.GraphQLModifier.LIST
+import live.luna.graphql.annotations.GraphQLModifier.NOT_NULL
 import live.luna.service.MasterService
 import live.luna.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,12 +37,15 @@ constructor(
 )
 
 
+@GraphQLObject
 class Point
-@GraphQLInputObject
+@GraphQLInputObject("InputPoint")
 constructor(
         @GraphQLInputField("lat")
+        @GraphQLField
         var lat: Double,
         @GraphQLInputField("lon")
+        @GraphQLField
         var lon: Double
 )
 
@@ -60,11 +65,17 @@ class Query {
         return masterService.getById(id)
     }
 
-    @GraphQLField(of = Master::class)
+    @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Master::class)
     fun feed(@GraphQLArgument("limit") limit: Limit,
              @GraphQLArgument("area", nullable = true) area: Area?,
              @GraphQLArgument("prevArea", nullable = true) prevArea: Area?): List<Master> {
         return masterService.getList(limit, area, prevArea)
+    }
+
+    @GraphQLComplexField(modifiers = [NOT_NULL, LIST, NOT_NULL], type = Point::class)
+    fun test(@GraphQLArgument("count") count: Int,
+             @GraphQLComplexArgument("array", modifiers = [NOT_NULL, LIST, NOT_NULL], type = Point::class) array: List<Point>): List<Point> {
+        return array
     }
 
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])

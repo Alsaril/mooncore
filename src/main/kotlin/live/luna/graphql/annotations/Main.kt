@@ -40,40 +40,61 @@ private fun processOutput(klass: Klass, context: ProcessorContext): GraphQLObjec
     return type
 }
 
+private fun modifyType(type: GraphQLType, modifiers: Array<GraphQLModifier>): GraphQLType {
+    return modifiers.foldRight(type) { wrap, oldType ->
+        when (wrap) {
+            GraphQLModifier.LIST -> GraphQLList(oldType)
+            GraphQLModifier.NOT_NULL -> GraphQLNonNull(oldType)
+        }
+    }
+}
+
 private fun processEntity(isField: Boolean, member: AccessibleObject, context: ProcessorContext): GraphQLFieldDefinition? {
-    val annotation = member.getAnnotation(GraphQLField::class.java) ?: return null
+    val simpleAnnotation: GraphQLField? = member.getAnnotation(GraphQLField::class.java)
+    val complexAnnotation: GraphQLComplexField? = member.getAnnotation(GraphQLComplexField::class.java)
+
+    if (simpleAnnotation == null && complexAnnotation == null) {
+        return null
+    }
+
+    if (simpleAnnotation != null && complexAnnotation != null) {
+        throw GraphQLSchemaBuilderException("Annotations @GraphQLField and @GraphQLComplexField can't be combined")
+    }
+
+    val isSimple = simpleAnnotation != null
 
     member.isAccessible = true
 
-    val klass = if (isField) (member as Field).type else (member as Method).returnType
-    val isSimpleList = (klass == List::class.java || klass.interfaces.contains(List::class.java)) && annotation.of != Void::class
-    val baseKlass = if (isSimpleList) annotation.of.java else klass
+    val klass = if (isField) (member as Field).type else (member as Method).returnType // this too
+    val baseKlass = if (isSimple) klass else complexAnnotation!!.type.java // autodetect not null type, constraints
 
     if (context.getOutputType(baseKlass) == null) {
         processOutput(baseKlass, context)
     }
 
-    val name = annotation.name.ifEmptyThen((member as Member).name)
-    val description = annotation.description.ifEmptyThenNull()
+    val name = (if (isSimple) simpleAnnotation!!.name else complexAnnotation!!.name)
+            .ifEmptyThen((member as Member).name)
+    val description = (if (isSimple) simpleAnnotation!!.description else complexAnnotation!!.description)
+            .ifEmptyThenNull()
     val baseType = context.getOutputType(baseKlass)
             ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${baseKlass.name}")
-    val baseTypeNullable = annotation.ofNullable
-    val type = if (isSimpleList) GraphQLList(if (baseTypeNullable) baseType else GraphQLNonNull(baseType)) else baseType
-    val nullable = annotation.nullable
+    val type = modifyType(baseType,
+            if (isSimple) (if (simpleAnnotation!!.nullable) arrayOf() else arrayOf(GraphQLModifier.NOT_NULL))
+            else complexAnnotation!!.modifiers)
 
     val graphQLField = GraphQLFieldDefinition.Builder()
             .name(name)
             .description(description)
-            .type(if (nullable) type else GraphQLNonNull(type))
+            .type(type as GraphQLOutputType)
 
     if (isField) {
-        graphQLField.dataFetcher { env -> (member as Field).get(EnvironmentWrapper(env, member.declaringClass).source) }
+        graphQLField.dataFetcher { env -> (member as Field).get(EnvironmentWrapper(env, member.declaringClass).source) } // runtime call
     } else {
         val (arguments, argumentInjectors) = processParameters(member as Method, context)
         graphQLField.argument(arguments)
         graphQLField.dataFetcher { env ->
             val wrapper = EnvironmentWrapper(env, member.declaringClass)
-            member.invoke(wrapper.source, *argumentInjectors.map { it.invoke(wrapper) }.toTypedArray())
+            member.invoke(wrapper.source, *argumentInjectors.map { it.invoke(wrapper) }.toTypedArray()) // runtime call
         }
     }
 
@@ -87,21 +108,33 @@ private fun processParameters(method: Method, context: ProcessorContext): Method
 
     val sourceKlass = method.declaringClass
     method.parameters.forEach {
-        val parameterAnnotation = it.getAnnotation(GraphQLArgument::class.java)
+        val simpleAnnotation: GraphQLArgument? = it.getAnnotation(GraphQLArgument::class.java)
+        val complexAnnotation: GraphQLComplexArgument? = it.getAnnotation(GraphQLComplexArgument::class.java)
         val contextAnnotation = it.getAnnotation(GraphQLContext::class.java)
         when {
-            parameterAnnotation != null -> {
-                val name = parameterAnnotation.name
-                val description = parameterAnnotation.description.ifEmptyThenNull()
-                val nullable = parameterAnnotation.nullable
-                val (type, creator) = getInputType(it.type, context)
+            simpleAnnotation != null || complexAnnotation != null -> {
+                if (simpleAnnotation != null && complexAnnotation != null) {
+                    throw GraphQLSchemaBuilderException("Annotations @GraphQLArgument and @GraphQLComplexArgument can't be combined")
+                }
+                val isSimple = simpleAnnotation != null
+                val name = if (isSimple) simpleAnnotation!!.name else complexAnnotation!!.name
+                val description = (if (isSimple) simpleAnnotation!!.description else complexAnnotation!!.description).ifEmptyThenNull()
+                val baseKlass = if (isSimple) it.type else complexAnnotation!!.type.java
+                val (baseType, baseCreator) = getInputType(baseKlass, context)
+                val type = modifyType(baseType,
+                        if (isSimple) (if (simpleAnnotation!!.nullable) arrayOf() else arrayOf(GraphQLModifier.NOT_NULL))
+                        else complexAnnotation!!.modifiers)
+                val depth = if (isSimple) 0 else complexAnnotation!!.modifiers.filter { it == GraphQLModifier.LIST }.count()
+                val creator = if (isSimple) baseCreator else { _, smth ->
+                    instantiateArgument(smth as List<Any?>, depth, 1, baseCreator)
+                }
 
                 val argument = graphql.schema.GraphQLArgument.Builder()
                         .name(name)
                         .description(description)
-                        .type(if (nullable) type else GraphQLNonNull(type))
+                        .type(type as GraphQLInputType)
                 arguments.add(argument.build())
-                argumentInjectors.add { env -> env(name).let { creator?.invoke(name, it) ?: it } }
+                argumentInjectors.add { env -> env(name).let { creator?.invoke(name, it) ?: it } } // runtime call
             }
             contextAnnotation != null -> argumentInjectors.add { env -> env.context }
             it.type == sourceKlass -> argumentInjectors.add { env -> env.source }
@@ -109,7 +142,12 @@ private fun processParameters(method: Method, context: ProcessorContext): Method
             else -> throw GraphQLSchemaBuilderException("Parameter ${it.type} in method ${method.name} cannot be injected")
         }
     }
-    return MethodSignatureHolder(arguments.toList(), argumentInjectors.toList())
+    return MethodSignatureHolder(arguments, argumentInjectors)
+}
+
+fun instantiateArgument(list: List<Any?>, depth: Int, current: Int, creator: InputObjectCreator?): List<Any?> {
+    if (depth == current) return list.map { creator?.invoke("", it) ?: it }
+    return list.map { instantiateArgument(it as List<Any?>, depth, current + 1, creator) }
 }
 
 private fun getInputType(klass: Klass, context: ProcessorContext): InputTypeWrapper {
@@ -143,8 +181,8 @@ private fun getInputType(klass: Klass, context: ProcessorContext): InputTypeWrap
     val creator: InputObjectCreator = { _, map ->
         map?.let {
             c.newInstance(*params.map {
-            (map as Map<String, Any>)[it.first]
-                    ?.let { sb -> it.second?.invoke(it.first, sb) ?: sb }
+                (map as Map<String, Any>)[it.first]
+                        ?.let { sb -> it.second?.invoke(it.first, sb) ?: sb } // runtime call
             }.toTypedArray())
         }
     }
