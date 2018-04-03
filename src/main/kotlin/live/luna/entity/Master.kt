@@ -1,9 +1,6 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.GraphQLComplexField
-import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLModifier
-import live.luna.graphql.annotations.GraphQLObject
+import live.luna.graphql.annotations.*
 import javax.persistence.*
 
 @Entity
@@ -67,6 +64,7 @@ data class Master(
         val services: List<Service> = listOf()
 
 ) {
+    @GraphQLInputObject(name = "master_argument")
     constructor() : this(
             name = "",
             user = User(),

@@ -11,6 +11,8 @@ import live.luna.service.ServiceTypeService
 import live.luna.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import javax.naming.AuthenticationException
+import javax.security.auth.message.AuthException
 
 lateinit var masterService: MasterService
 lateinit var userService: UserService
@@ -104,6 +106,16 @@ class Mutation {
     fun token(@GraphQLArgument("email") email: String,
               @GraphQLArgument("password") password: String): String? {
         return userService.token(email, password)
+    }
+
+
+    @GraphQLField
+    fun updateMaster(@GraphQLArgument("master") master: Master,
+                     @GraphQLContext context: UserContext): Master {
+        if (context.user == null) {
+            throw AuthException("You are not authenticated")
+        }
+        return masterService.getById(1)!!
     }
 
 }
