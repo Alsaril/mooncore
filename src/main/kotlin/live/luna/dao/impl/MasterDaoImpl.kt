@@ -77,9 +77,9 @@ class MasterDaoImpl : MasterDao {
             }
         }
 
-        serviceTypes?.let {
+        if (serviceTypes?.isNotEmpty() == true) {
             val join = root.join<Master, Service>("services")
-            predicates.add(join.get<Service>("type").get<Long>("id").`in`(it))
+            predicates.add(join.get<Service>("type").get<Long>("id").`in`(serviceTypes))
         }
 
         val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))

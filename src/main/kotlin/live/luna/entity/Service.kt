@@ -18,10 +18,6 @@ data class Service(
         @GraphQLField
         val id: Long = 0,
 
-        @Column(name = "name", nullable = false)
-        @GraphQLField
-        val name: String,
-
         @ManyToOne
         @JoinColumn(name = "type", nullable = false)
         @GraphQLField
@@ -63,5 +59,5 @@ data class Service(
         val photos: List<Photo>
 
 ) {
-    constructor() : this(name = "", price = BigDecimal.ZERO, type = ServiceType(), master = Master(), materials = ArrayList(), photos = ArrayList())
+    constructor() : this(price = BigDecimal.ZERO, type = ServiceType(), master = Master(), materials = ArrayList(), photos = ArrayList())
 }

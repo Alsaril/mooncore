@@ -79,12 +79,6 @@ class Query {
         return masterService.getList(limit, area, prevArea, serviceTypes)
     }
 
-    @GraphQLComplexField(modifiers = [NOT_NULL, LIST, NOT_NULL], type = Point::class)
-    fun test(@GraphQLArgument("count") count: Int,
-             @GraphQLComplexArgument("array", modifiers = [NOT_NULL, LIST, NOT_NULL], type = Point::class) array: List<Point>): List<Point> {
-        return array
-    }
-
     @GraphQLComplexField(modifiers = [NOT_NULL, LIST, NOT_NULL], type = ServiceType::class)
     fun serviceTypes(): List<ServiceType> {
         return serviceTypeService.getAll()
