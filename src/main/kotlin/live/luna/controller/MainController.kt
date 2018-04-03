@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest
 
 
 @RestController
-class HelloController {
+class MainController {
 
     @PostMapping("/api/graphql")
     fun index(@RequestBody body: GraphQLRequest, request: HttpServletRequest): Any {

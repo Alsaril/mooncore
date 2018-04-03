@@ -4,6 +4,7 @@ import live.luna.graphql.annotations.GraphQLComplexField
 import live.luna.graphql.annotations.GraphQLField
 import live.luna.graphql.annotations.GraphQLModifier
 import live.luna.graphql.annotations.GraphQLObject
+import java.math.BigDecimal
 import java.util.*
 import javax.persistence.*
 
@@ -17,9 +18,10 @@ data class Service(
         @GraphQLField
         val id: Long = 0,
 
-        @Column(name = "name", nullable = false)
+        @ManyToOne
+        @JoinColumn(name = "type", nullable = false)
         @GraphQLField
-        val name: String,
+        val type: ServiceType,
 
         @ManyToOne
         @JoinColumn(name = "master_id", nullable = false)
@@ -28,16 +30,15 @@ data class Service(
 
         @Column(name = "price", nullable = false)
         @GraphQLField
-        val price: Double = 0.0,
+        val price: BigDecimal,
 
         @Column(name = "description", nullable = false, columnDefinition = "TEXT")
         @GraphQLField
         val description: String = "",
 
-        @Column(name = "ctime", nullable = false)
-        @Temporal(TemporalType.TIMESTAMP)
+        @Column(name = "duration", nullable = false)
         @GraphQLField
-        val ctime: Date = Date(),
+        val duration: Long = 0,
 
         @ManyToMany(cascade = [CascadeType.ALL])
         @JoinTable(
@@ -58,5 +59,5 @@ data class Service(
         val photos: List<Photo>
 
 ) {
-    constructor() : this(name = "", master = Master(), materials = ArrayList(), photos = ArrayList())
+    constructor() : this(price = BigDecimal.ZERO, type = ServiceType(), master = Master(), materials = ArrayList(), photos = ArrayList())
 }
