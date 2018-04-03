@@ -9,5 +9,5 @@ interface MasterService {
     fun update(master: Master)
     fun delete(master: Master)
     fun getById(id: Long): Master?
-    fun getList(limit: Limit, area: Area?, prevArea: Area?): List<Master>
+    fun getList(limit: Limit, area: Area?, prevArea: Area?, serviceTypes: List<Long>?): List<Master>
 }

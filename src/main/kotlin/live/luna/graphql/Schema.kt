@@ -73,8 +73,10 @@ class Query {
     @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Master::class)
     fun feed(@GraphQLArgument("limit") limit: Limit,
              @GraphQLArgument("area", nullable = true) area: Area?,
-             @GraphQLArgument("prevArea", nullable = true) prevArea: Area?): List<Master> {
-        return masterService.getList(limit, area, prevArea)
+             @GraphQLArgument("prevArea", nullable = true) prevArea: Area?,
+             @GraphQLComplexArgument("service_types", modifiers = [LIST, NOT_NULL],
+                     type = Long::class) serviceTypes: List<Long>?): List<Master> {
+        return masterService.getList(limit, area, prevArea, serviceTypes)
     }
 
     @GraphQLComplexField(modifiers = [NOT_NULL, LIST, NOT_NULL], type = Point::class)
