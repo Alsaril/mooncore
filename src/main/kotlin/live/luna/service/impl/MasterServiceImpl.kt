@@ -30,6 +30,10 @@ class MasterServiceImpl : MasterService {
         return masterDao.getById(id)
     }
 
+    override fun getByUserId(userId: Long): Master? {
+        return masterDao.getByUserId(userId)
+    }
+
     override fun getList(limit: Limit, area: Area?, prevArea: Area?,
                          serviceTypes: List<Long>?): List<Master> {
         return masterDao.getList(limit, area, prevArea, serviceTypes)

@@ -36,6 +36,19 @@ class MasterDaoImpl : MasterDao {
         return em.find(Master::class.java, id)
     }
 
+    override fun getByUserId(userId: Long): Master? {
+        val query = em.criteriaBuilder.createQuery(Master::class.java)
+        val root = query.from(Master::class.java)
+        query
+                .select(root)
+                .where(em.criteriaBuilder.equal(root.get<Master>("user").get<Long>("id"), userId))
+
+        return em.createQuery(query)
+                .resultList
+                .takeIf { it.isNotEmpty() }
+                ?.let { return it[0] }
+    }
+
     override fun getList(limit: Limit, area: Area?,
                          prevArea: Area?, serviceTypes: List<Long>?): List<Master> {
         if (limit.limit <= 0 || limit.offset < 0) {

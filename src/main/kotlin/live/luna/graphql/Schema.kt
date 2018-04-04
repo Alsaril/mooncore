@@ -11,8 +11,6 @@ import live.luna.service.ServiceTypeService
 import live.luna.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import javax.naming.AuthenticationException
-import javax.security.auth.message.AuthException
 
 lateinit var masterService: MasterService
 lateinit var userService: UserService
@@ -94,28 +92,46 @@ class Query {
 
 @GraphQLObject
 class Mutation {
-    @GraphQLField
+    @GraphQLField(nullable = true)
     fun createUser(@GraphQLArgument("email") email: String,
                    @GraphQLArgument("password") password: String,
-                   @GraphQLArgument("name") name: String,
-                   @GraphQLArgument("role") role: Int): User? {
+                   @GraphQLArgument("role") role: Int,
+                   @GraphQLArgument("name", nullable = true) name: String?): User? {
         return userService.createUser(email, password, name, role)
     }
 
-    @GraphQLField
+    @GraphQLField(nullable = true)
     fun token(@GraphQLArgument("email") email: String,
               @GraphQLArgument("password") password: String): String? {
         return userService.token(email, password)
     }
 
 
-    @GraphQLField
-    fun updateMaster(@GraphQLArgument("master") master: Master,
-                     @GraphQLContext context: UserContext): Master {
+    @GraphQLField(nullable = true)
+    fun updateMaster(@GraphQLArgument("master") inputMaster: Master,
+                     @GraphQLContext context: UserContext): Master? {
         if (context.user == null) {
-            throw AuthException("You are not authenticated")
+            return null
         }
-        return masterService.getById(1)!!
-    }
 
+        val existing = masterService.getByUserId(context.user.id) ?: return null // wtf?
+        val builder = Master.Builder.from(existing)
+
+        inputMaster.name?.let {
+            builder.setName(it)
+        }
+        inputMaster.address?.let {
+            builder.setAddress(it)
+        }
+        inputMaster.avatar?.let {
+            builder.setAvatar(it)
+        }
+        inputMaster.salon?.let {
+            builder.setSalon(it)
+        }
+
+        val newMaster = builder.build()
+        masterService.update(newMaster)
+        return newMaster
+    }
 }

@@ -1,6 +1,8 @@
 package live.luna.entity
 
 import live.luna.graphql.annotations.GraphQLField
+import live.luna.graphql.annotations.GraphQLInputField
+import live.luna.graphql.annotations.GraphQLInputObject
 import live.luna.graphql.annotations.GraphQLObject
 import javax.persistence.*
 
@@ -33,5 +35,12 @@ data class Salon(
         val stars: Int = 0
 
 ) {
+    @GraphQLInputObject(name = "SalonInput")
+    constructor(
+            @GraphQLInputField(name = "name") name: String,
+            @GraphQLInputField(name = "address") address: Address,
+            @GraphQLInputField(name = "photo") photo: Photo) :
+            this(id = 0, name = name, address = address, photo = photo)
+
     constructor() : this(address = Address(), photo = Photo(), name = "")
 }

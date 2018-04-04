@@ -46,7 +46,7 @@ class UserServiceImpl : UserService {
     }
 
     @Transactional
-    override fun createUser(email: String, password: String, name: String, role: Int): User? {
+    override fun createUser(email: String, password: String, name: String?, role: Int): User? {
         val user = User(email = email, password = BCrypt.hashpw(password, BCrypt.gensalt()), role = role)
         insert(user)
         when (role) {
