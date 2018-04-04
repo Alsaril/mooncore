@@ -56,7 +56,12 @@ data class Service(
                 inverseJoinColumns = [JoinColumn(name = "photo_id")]
         )
         @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Photo::class)
-        val photos: List<Photo>
+        val photos: List<Photo>,
+
+        @Column(name = "ctime", nullable = false)
+        @Temporal(TemporalType.TIMESTAMP)
+        @GraphQLField
+        val ctime: Date = Date()
 
 ) {
     constructor() : this(price = BigDecimal.ZERO, type = ServiceType(), master = Master(), materials = ArrayList(), photos = ArrayList())

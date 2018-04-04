@@ -1,32 +1,35 @@
 package live.luna.graphql
 
-import live.luna.entity.Master
-import live.luna.entity.ServiceType
-import live.luna.entity.User
+import live.luna.entity.*
 import live.luna.graphql.annotations.*
 import live.luna.graphql.annotations.GraphQLModifier.LIST
 import live.luna.graphql.annotations.GraphQLModifier.NOT_NULL
 import live.luna.service.MasterService
+import live.luna.service.ServiceService
 import live.luna.service.ServiceTypeService
 import live.luna.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 
 lateinit var masterService: MasterService
 lateinit var userService: UserService
 lateinit var serviceTypeService: ServiceTypeService
+lateinit var serviceService: ServiceService
 
 @Component
 class Initter
 @Autowired constructor(
         _masterService: MasterService,
         _userService: UserService,
-        _serviceTypeService: ServiceTypeService
+        _serviceTypeService: ServiceTypeService,
+        _serviceService: ServiceService
 ) {
     init {
         masterService = _masterService
         userService = _userService
         serviceTypeService = _serviceTypeService
+        serviceService = _serviceService
     }
 }
 
@@ -111,5 +114,32 @@ class Mutation {
     fun updateMaster(@GraphQLArgument("master") master: Master,
                      @GraphQLContext context: UserContext): Master? {
         return masterService.updateMaster(master, context)
+    }
+
+    @GraphQLField(nullable = true)
+    fun addService(@GraphQLArgument("type_id") typeId: Long,
+                   @GraphQLArgument("price") price: BigDecimal,
+                   @GraphQLArgument("description") description: String,
+                   @GraphQLArgument("duration") duration: Long,
+                   @GraphQLComplexArgument("materials", modifiers = [LIST, NOT_NULL],
+                           type = Material::class) materials: List<Material>?,
+                   @GraphQLComplexArgument("photos", modifiers = [LIST, NOT_NULL],
+                           type = Photo::class) photos: List<Photo>?,
+                   @GraphQLContext context: UserContext): Service? {
+
+        return serviceService.addService(
+                typeId = typeId,
+                price = price,
+                description = description,
+                duration = duration,
+                materials = materials,
+                photos = photos,
+                context = context)
+    }
+
+    @GraphQLField(nullable = true)
+    fun removeService(@GraphQLArgument("service_id") serviceId: Long,
+                      @GraphQLContext context: UserContext): Service? {
+        return serviceService.removeService(serviceId, context)
     }
 }
