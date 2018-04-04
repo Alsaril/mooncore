@@ -1,9 +1,6 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.GraphQLComplexField
-import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLModifier
-import live.luna.graphql.annotations.GraphQLObject
+import live.luna.graphql.annotations.*
 import javax.persistence.*
 
 @Entity
@@ -16,9 +13,9 @@ data class Master(
         @GraphQLField
         val id: Long = 0,
 
-        @Column(name = "name", nullable = false)
-        @GraphQLField
-        val name: String,
+        @Column(name = "name", nullable = true)
+        @GraphQLField(nullable = true)
+        val name: String?,
 
         @OneToOne
         @JoinColumn(name = "user_id", unique = true, nullable = false)
@@ -67,14 +64,118 @@ data class Master(
         val services: List<Service> = listOf()
 
 ) {
-    constructor() : this(
-            name = "",
+    @GraphQLInputObject(name = "MasterInput")
+    constructor(@GraphQLInputField(name = "name", nullable = true) name: String?,
+                @GraphQLInputField(name = "address", nullable = true) address: Address?,
+                @GraphQLInputField(name = "avatar", nullable = true) avatar: Photo?,
+                @GraphQLInputField(name = "salon", nullable = true) salon: Salon?)
+            : this(
+            name = name ?: "",
             user = User(),
-            address = Address(),
-            avatar = Photo(),
-            salon = Salon(),
-            signs = ArrayList(),
-            photos = ArrayList(),
-            services = ArrayList()
+            address = address,
+            avatar = avatar,
+            salon = salon
     )
+
+
+    constructor() : this(
+            name = null,
+            user = User(),
+            address = null,
+            avatar = null,
+            salon = null
+    )
+
+    class Builder() {
+        private var id: Long = 0
+        private var name: String? = null
+        private var user: User? = null
+        private var address: Address? = null
+        private var avatar: Photo? = null
+        private var salon: Salon? = null
+        private var stars: Int = 0
+        private var signs: List<Sign> = emptyList()
+        private var photos: List<Photo> = emptyList()
+        private var services: List<Service> = emptyList()
+
+        fun setId(id: Long): Builder {
+            this.id = id
+            return this
+        }
+
+        fun setName(name: String?): Builder {
+            this.name = name
+            return this
+        }
+
+        fun setUser(user: User): Builder {
+            this.user = user
+            return this
+        }
+
+        fun setAddress(address: Address?): Builder {
+            this.address = address
+            return this
+        }
+
+        fun setAvatar(avatar: Photo?): Builder {
+            this.avatar = avatar
+            return this
+        }
+
+        fun setSalon(salon: Salon?): Builder {
+            this.salon = salon
+            return this
+        }
+
+        fun setStars(stars: Int): Builder {
+            this.stars = stars
+            return this
+        }
+
+        fun setSigns(signs: List<Sign>): Builder {
+            this.signs = signs
+            return this
+        }
+
+        fun setPhotos(photos: List<Photo>): Builder {
+            this.photos = photos
+            return this
+        }
+
+        fun setServices(services: List<Service>): Builder {
+            this.services = services
+            return this
+        }
+
+        fun build() = Master(
+                id = id,
+                name = name,
+                user = user ?: throw NullPointerException("Master cannot be built with null user field!"),
+                address = address,
+                avatar = avatar,
+                salon = salon,
+                stars = stars,
+                signs = signs,
+                photos = photos,
+                services = services
+        )
+
+        companion object {
+            fun from(master: Master): Builder {
+                val builder = Builder()
+                builder.id = master.id
+                builder.name = master.name
+                builder.user = master.user
+                builder.address = master.address
+                builder.avatar = master.avatar
+                builder.salon = master.salon
+                builder.stars = master.stars
+                builder.signs = master.signs
+                builder.photos = master.photos
+                builder.services = master.services
+                return builder
+            }
+        }
+    }
 }

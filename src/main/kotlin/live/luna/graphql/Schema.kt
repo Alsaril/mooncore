@@ -92,18 +92,24 @@ class Query {
 
 @GraphQLObject
 class Mutation {
-    @GraphQLField
+    @GraphQLField(nullable = true)
     fun createUser(@GraphQLArgument("email") email: String,
                    @GraphQLArgument("password") password: String,
-                   @GraphQLArgument("name") name: String,
-                   @GraphQLArgument("role") role: Int): User? {
+                   @GraphQLArgument("role") role: Int,
+                   @GraphQLArgument("name", nullable = true) name: String?): User? {
         return userService.createUser(email, password, name, role)
     }
 
-    @GraphQLField
+    @GraphQLField(nullable = true)
     fun token(@GraphQLArgument("email") email: String,
               @GraphQLArgument("password") password: String): String? {
         return userService.token(email, password)
     }
 
+
+    @GraphQLField(nullable = true)
+    fun updateMaster(@GraphQLArgument("master") master: Master,
+                     @GraphQLContext context: UserContext): Master? {
+        return masterService.updateMaster(master, context)
+    }
 }
