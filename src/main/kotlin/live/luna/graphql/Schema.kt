@@ -108,30 +108,8 @@ class Mutation {
 
 
     @GraphQLField(nullable = true)
-    fun updateMaster(@GraphQLArgument("master") inputMaster: Master,
+    fun updateMaster(@GraphQLArgument("master") master: Master,
                      @GraphQLContext context: UserContext): Master? {
-        if (context.user == null) {
-            return null
-        }
-
-        val existing = masterService.getByUserId(context.user.id) ?: return null // wtf?
-        val builder = Master.Builder.from(existing)
-
-        inputMaster.name?.let {
-            builder.setName(it)
-        }
-        inputMaster.address?.let {
-            builder.setAddress(it)
-        }
-        inputMaster.avatar?.let {
-            builder.setAvatar(it)
-        }
-        inputMaster.salon?.let {
-            builder.setSalon(it)
-        }
-
-        val newMaster = builder.build()
-        masterService.update(newMaster)
-        return newMaster
+        return masterService.updateMaster(master, context)
     }
 }
