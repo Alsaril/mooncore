@@ -23,7 +23,7 @@ data class Photo(
                 joinColumns = [JoinColumn(name = "photo_id")],
                 inverseJoinColumns = [JoinColumn(name = "tag_id")]
         )
-        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Tag::class)
+        @GraphQLListField(type = Tag::class)
         val tags: List<Tag>
 ) {
     @GraphQLInputObject(name = "PhotoInput")

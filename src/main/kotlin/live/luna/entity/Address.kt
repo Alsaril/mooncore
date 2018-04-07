@@ -26,7 +26,7 @@ data class Address(
         val description: String,
 
         @OneToMany(mappedBy = "address", cascade = [CascadeType.ALL])
-        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = AddressMetro::class)
+        @GraphQLListField(type = AddressMetro::class)
         val metros: List<AddressMetro>
 ) {
     @GraphQLInputObject(name = "AddressInput")
