@@ -1,10 +1,10 @@
 package live.luna.graphql
 
 import live.luna.entity.Master
+import live.luna.entity.Photo
+import live.luna.entity.Salon
 import live.luna.entity.User
 import live.luna.graphql.annotations.*
-import live.luna.graphql.annotations.GraphQLModifier.LIST
-import live.luna.graphql.annotations.GraphQLModifier.NOT_NULL
 import live.luna.service.MasterService
 import live.luna.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,6 +58,15 @@ constructor(
         var to: Point
 )
 
+@GraphQLInterface(implementedBy = [Master::class, Salon::class])
+class FeedItem(
+        @GraphQLField
+        val name: String,
+
+        @GraphQLListField(type = Photo::class)
+        val photos: List<Photo>
+)
+
 @GraphQLObject
 class Query {
     @GraphQLField(nullable = true)
@@ -65,16 +74,16 @@ class Query {
         return masterService.getById(id)
     }
 
-    @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Master::class)
+    @GraphQLListField(type = FeedItem::class)
     fun feed(@GraphQLArgument("limit") limit: Limit,
              @GraphQLArgument("area", nullable = true) area: Area?,
-             @GraphQLArgument("prevArea", nullable = true) prevArea: Area?): List<Master> {
-        return masterService.getList(limit, area, prevArea)
+             @GraphQLArgument("prevArea", nullable = true) prevArea: Area?): List<Any> {
+        return listOf(Salon(), Master(), Master())
     }
 
-    @GraphQLComplexField(modifiers = [NOT_NULL, LIST, NOT_NULL], type = Point::class)
+    @GraphQLListField(type = Point::class)
     fun test(@GraphQLArgument("count") count: Int,
-             @GraphQLComplexArgument("array", modifiers = [NOT_NULL, LIST, NOT_NULL], type = Point::class) array: List<Point>): List<Point> {
+             @GraphQLListArgument("array", type = Point::class) array: List<Point>): List<Point> {
         return array
     }
 

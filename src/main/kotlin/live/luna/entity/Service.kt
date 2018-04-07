@@ -1,8 +1,7 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.GraphQLComplexField
 import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLModifier
+import live.luna.graphql.annotations.GraphQLListField
 import live.luna.graphql.annotations.GraphQLObject
 import java.util.*
 import javax.persistence.*
@@ -45,7 +44,7 @@ data class Service(
                 joinColumns = [JoinColumn(name = "service_id")],
                 inverseJoinColumns = [JoinColumn(name = "material_id")]
         )
-        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Material::class)
+        @GraphQLListField(type = Material::class)
         val materials: List<Material>,
 
         @ManyToMany(cascade = [CascadeType.ALL])
@@ -54,7 +53,7 @@ data class Service(
                 joinColumns = [JoinColumn(name = "service_id")],
                 inverseJoinColumns = [JoinColumn(name = "photo_id")]
         )
-        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Photo::class)
+        @GraphQLListField(type = Photo::class)
         val photos: List<Photo>
 
 ) {

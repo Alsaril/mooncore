@@ -1,8 +1,7 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.GraphQLComplexField
 import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLModifier
+import live.luna.graphql.annotations.GraphQLListField
 import live.luna.graphql.annotations.GraphQLObject
 import javax.persistence.*
 
@@ -17,7 +16,7 @@ data class Master(
         val id: Long = 0,
 
         @Column(name = "name", nullable = false)
-        @GraphQLField
+
         val name: String,
 
         @OneToOne
@@ -50,7 +49,7 @@ data class Master(
                 joinColumns = [JoinColumn(name = "master_id")],
                 inverseJoinColumns = [JoinColumn(name = "sign_id")]
         )
-        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Sign::class)
+        @GraphQLListField(type = Sign::class)
         val signs: List<Sign> = listOf(),
 
         @ManyToMany(cascade = [CascadeType.ALL])
@@ -59,11 +58,11 @@ data class Master(
                 joinColumns = [JoinColumn(name = "master_id")],
                 inverseJoinColumns = [JoinColumn(name = "photo_id")]
         )
-        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Photo::class)
+        @GraphQLListField(type = Photo::class)
         val photos: List<Photo> = listOf(),
 
         @OneToMany(mappedBy = "master", cascade = [CascadeType.ALL])
-        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Service::class)
+        @GraphQLListField(type = Service::class)
         val services: List<Service> = listOf()
 
 ) {
