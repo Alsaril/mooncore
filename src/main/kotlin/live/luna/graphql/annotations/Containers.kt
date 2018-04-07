@@ -72,11 +72,11 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
     fun getOutputType(klass: Klass): GraphQLOutputType? = knownOutputTypes[klass]
             ?: processingOutputTypes[klass]?.let { GraphQLTypeReference(it) }
 
-    fun processOutput(klass: Klass, name: String) {
+    fun setOutputTypeAsProcessing(klass: Klass, name: String) {
         processingOutputTypes[klass] = name
     }
 
-    fun knowOutput(klass: Klass, type: GraphQLOutputType) {
+    fun setOutputTypeAsKnown(klass: Klass, type: GraphQLOutputType) {
         processingOutputTypes.remove(klass)
         knownOutputTypes[klass] = type
     }

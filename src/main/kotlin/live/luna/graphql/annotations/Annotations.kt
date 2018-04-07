@@ -5,10 +5,19 @@ import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
 @MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
+@Retention
 annotation class GraphQLObject(
         val name: String = "",
         val description: String = ""
+)
+
+@Target(AnnotationTarget.CLASS)
+@MustBeDocumented
+@Retention
+annotation class GraphQLInterface(
+        val name: String = "",
+        val description: String = "",
+        val implementedBy: Array<KClass<*>>
 )
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
@@ -23,10 +32,11 @@ annotation class GraphQLField(
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
 @MustBeDocumented
 @Retention
-annotation class GraphQLComplexField(
+annotation class GraphQLListField(
         val name: String = "",
         val description: String = "",
-        val modifiers: Array<GraphQLModifier>,
+        val nullable: Boolean = false,
+        val depth: Int = 1,
         val type: KClass<*>
 )
 
@@ -43,13 +53,13 @@ annotation class GraphQLArgument(
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @MustBeDocumented
 @Retention
-annotation class GraphQLComplexArgument(
+annotation class GraphQLListArgument(
         val name: String,
         val description: String = "",
         val nullable: Boolean = false,
-        val default: KClass<out Supplier<out Any>> = DefaultSupplier::class,
-        val modifiers: Array<GraphQLModifier>,
-        val type: KClass<*>
+        val depth: Int = 1,
+        val type: KClass<*>,
+        val default: KClass<out Supplier<out Any>> = DefaultSupplier::class
 )
 
 @Target(AnnotationTarget.CONSTRUCTOR)
@@ -88,8 +98,4 @@ annotation class GraphQLUnion(
 
 private class DefaultSupplier : Supplier<Unit> {
     override fun get() = Unit
-}
-
-enum class GraphQLModifier {
-    NOT_NULL, LIST
 }

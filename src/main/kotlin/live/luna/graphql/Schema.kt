@@ -2,17 +2,14 @@ package live.luna.graphql
 
 import live.luna.entity.*
 import live.luna.graphql.annotations.*
-import live.luna.graphql.annotations.GraphQLModifier.LIST
-import live.luna.graphql.annotations.GraphQLModifier.NOT_NULL
-import live.luna.service.MasterService
-import live.luna.service.ServiceService
-import live.luna.service.ServiceTypeService
-import live.luna.service.UserService
+import live.luna.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.util.*
 
 lateinit var masterService: MasterService
+lateinit var clientService: ClientService
 lateinit var userService: UserService
 lateinit var serviceTypeService: ServiceTypeService
 lateinit var serviceService: ServiceService
@@ -23,13 +20,15 @@ class Initter
         _masterService: MasterService,
         _userService: UserService,
         _serviceTypeService: ServiceTypeService,
-        _serviceService: ServiceService
+        _serviceService: ServiceService,
+        _clientService: ClientService
 ) {
     init {
         masterService = _masterService
         userService = _userService
         serviceTypeService = _serviceTypeService
         serviceService = _serviceService
+        clientService = _clientService
     }
 }
 
@@ -66,6 +65,15 @@ constructor(
         var to: Point
 )
 
+@GraphQLInterface(implementedBy = [Master::class, Salon::class])
+class FeedItem(
+        @GraphQLField
+        val name: String,
+
+        @GraphQLListField(type = Photo::class)
+        val photos: List<Photo>
+)
+
 @GraphQLObject
 class Query {
     @GraphQLField(nullable = true)
@@ -73,16 +81,23 @@ class Query {
         return masterService.getById(id)
     }
 
-    @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Master::class)
+    @GraphQLListField(type = FeedItem::class)
     fun feed(@GraphQLArgument("limit") limit: Limit,
              @GraphQLArgument("area", nullable = true) area: Area?,
              @GraphQLArgument("prevArea", nullable = true) prevArea: Area?,
-             @GraphQLComplexArgument("service_types", modifiers = [LIST, NOT_NULL],
-                     type = Long::class) serviceTypes: List<Long>?): List<Master> {
-        return masterService.getList(limit, area, prevArea, serviceTypes)
+             @GraphQLListArgument("service_types",
+                     type = Long::class,
+                     nullable = true) serviceTypes: List<Long>?): List<Any> {
+        return listOf(Salon(), Master(), Master())//masterService.getList(limit, area, prevArea, serviceTypes)
     }
 
-    @GraphQLComplexField(modifiers = [NOT_NULL, LIST, NOT_NULL], type = ServiceType::class)
+    @GraphQLListField(type = Point::class)
+    fun test(@GraphQLArgument("count") count: Int,
+             @GraphQLListArgument("array", type = Point::class) array: List<Point>): List<Point> {
+        return array
+    }
+
+    @GraphQLListField(type = ServiceType::class)
     fun serviceTypes(): List<ServiceType> {
         return serviceTypeService.getAll()
     }
@@ -121,9 +136,11 @@ class Mutation {
                    @GraphQLArgument("price") price: BigDecimal,
                    @GraphQLArgument("description") description: String,
                    @GraphQLArgument("duration") duration: Long,
-                   @GraphQLComplexArgument("materials", modifiers = [LIST, NOT_NULL],
+                   @GraphQLListArgument("materials",
+                           nullable = true,
                            type = Material::class) materials: List<Material>?,
-                   @GraphQLComplexArgument("photos", modifiers = [LIST, NOT_NULL],
+                   @GraphQLListArgument("photos",
+                           nullable = true,
                            type = Photo::class) photos: List<Photo>?,
                    @GraphQLContext context: UserContext): Service? {
 
