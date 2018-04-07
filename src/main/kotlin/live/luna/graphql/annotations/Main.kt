@@ -33,7 +33,9 @@ private fun processOutput(klass: Klass, context: ProcessorContext): GraphQLType 
             processEntity(true, it, context)?.let { builder.field(it) }
         }
 
-        val descendants: Map<Klass, GraphQLType> = it.implementedBy.map { it.java to processOutput(it.java, context) }.toMap()
+        val descendants: Map<Klass, GraphQLType> = it.implementedBy.map {
+            it.java to (context.getOutputType(it.java) as? GraphQLType ?: processOutput(it.java, context))
+        }.toMap()
 
         val type = builder
                 .typeResolver {
