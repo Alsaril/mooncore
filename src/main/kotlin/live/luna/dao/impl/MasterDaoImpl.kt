@@ -3,6 +3,7 @@ package live.luna.dao.impl
 import live.luna.dao.MasterDao
 import live.luna.entity.Address
 import live.luna.entity.Master
+import live.luna.entity.Service
 import live.luna.graphql.Area
 import live.luna.graphql.Limit
 import org.springframework.stereotype.Repository
@@ -35,19 +36,33 @@ class MasterDaoImpl : MasterDao {
         return em.find(Master::class.java, id)
     }
 
-    override fun getList(limit: Limit, area: Area?, prevArea: Area?): List<Master> {
+    override fun getByUserId(userId: Long): Master? {
+        val query = em.criteriaBuilder.createQuery(Master::class.java)
+        val root = query.from(Master::class.java)
+        query
+                .select(root)
+                .where(em.criteriaBuilder.equal(root.get<Master>("user").get<Long>("id"), userId))
+
+        return em.createQuery(query)
+                .resultList
+                .takeIf { it.isNotEmpty() }
+                ?.let { return it[0] }
+    }
+
+    override fun getList(limit: Limit, area: Area?,
+                         prevArea: Area?, serviceTypes: List<Long>?): List<Master> {
         if (limit.limit <= 0 || limit.offset < 0) {
             return emptyList()
         }
 
         if (area != null && area.from.lat > area.to.lat) {
             area.from = area.to.also { area.to = area.from }
-            return getList(limit, area, prevArea)
+            return getList(limit, area, prevArea, serviceTypes)
         }
 
         if (prevArea != null && prevArea.from.lat > prevArea.to.lat) {
             prevArea.from = prevArea.to.also { prevArea.to = prevArea.from }
-            return getList(limit, area, prevArea)
+            return getList(limit, area, prevArea, serviceTypes)
         }
 
         val criteriaQuery = em.criteriaBuilder.createQuery(Master::class.java)
@@ -75,9 +90,15 @@ class MasterDaoImpl : MasterDao {
             }
         }
 
+        if (serviceTypes?.isNotEmpty() == true) {
+            // TODO optimize it to avoid distinct below
+            val join = root.join<Master, Service>("services")
+            predicates.add(join.get<Service>("type").get<Long>("id").`in`(serviceTypes))
+        }
+
         val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
         typedQuery.firstResult = limit.offset
         typedQuery.maxResults = limit.limit
-        return typedQuery.resultList
+        return typedQuery.resultList.distinct()
     }
 }

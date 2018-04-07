@@ -15,9 +15,9 @@ data class Client(
         @GraphQLField
         val id: Long = 0,
 
-        @Column(name = "name", nullable = false)
-        @GraphQLField
-        val name: String,
+        @Column(name = "name", nullable = true)
+        @GraphQLField(nullable = true)
+        val name: String?,
 
         @OneToOne
         @JoinColumn(name = "user_id", nullable = false)
@@ -39,5 +39,5 @@ data class Client(
         val favorites: List<Master> = listOf()
 
 ) {
-    constructor() : this(user = User(), avatar = Photo(), name = "", favorites = ArrayList())
+    constructor() : this(user = User(), avatar = null, name = null)
 }

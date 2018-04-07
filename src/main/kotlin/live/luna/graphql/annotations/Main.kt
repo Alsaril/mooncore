@@ -148,7 +148,7 @@ private fun processParameters(method: Method, context: ProcessorContext): Method
                 val type = if (isSimple) baseType else modifyType(baseType, complexAnnotation!!.depth)
                 val wrappedType = if (nullable) type else GraphQLNonNull(type)
                 val creator = if (isSimple) baseCreator else { _, smth ->
-                    instantiateArgument(smth as List<Any?>, complexAnnotation!!.depth, 1, baseCreator)
+                    instantiateArgument(smth as List<Any?>?, complexAnnotation!!.depth, 1, baseCreator)
                 }
 
                 val argument = graphql.schema.GraphQLArgument.Builder()
@@ -167,9 +167,9 @@ private fun processParameters(method: Method, context: ProcessorContext): Method
     return MethodSignatureHolder(arguments, argumentInjectors)
 }
 
-fun instantiateArgument(list: List<Any?>, depth: Int, current: Int, creator: InputObjectCreator?): List<Any?> {
-    if (depth == current) return list.map { creator?.invoke("", it) ?: it }
-    return list.map { instantiateArgument(it as List<Any?>, depth, current + 1, creator) }
+fun instantiateArgument(list: List<Any?>?, depth: Int, current: Int, creator: InputObjectCreator?): List<Any?>? {
+    if (depth == current) return list?.map { creator?.invoke("", it) ?: it }
+    return list?.map { instantiateArgument(it as List<Any?>, depth, current + 1, creator) }
 }
 
 private fun getInputType(klass: Klass, context: ProcessorContext): InputTypeWrapper {
