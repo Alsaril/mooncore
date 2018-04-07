@@ -1,7 +1,6 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLObject
+import live.luna.graphql.annotations.*
 import javax.persistence.*
 
 @Entity
@@ -24,8 +23,11 @@ data class Photo(
                 joinColumns = [JoinColumn(name = "photo_id")],
                 inverseJoinColumns = [JoinColumn(name = "tag_id")]
         )
-        @GraphQLField(of = Tag::class)
+        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Tag::class)
         val tags: List<Tag>
 ) {
-        constructor() : this(path = "", tags = ArrayList())
+    @GraphQLInputObject(name = "PhotoInput")
+    constructor(@GraphQLInputField(name = "path") path: String) : this(path = path, tags = emptyList())
+
+    constructor() : this(path = "", tags = ArrayList())
 }

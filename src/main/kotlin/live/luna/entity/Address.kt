@@ -1,7 +1,6 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLObject
+import live.luna.graphql.annotations.*
 import javax.persistence.*
 
 @Entity
@@ -27,8 +26,15 @@ data class Address(
         val description: String,
 
         @OneToMany(mappedBy = "address", cascade = [CascadeType.ALL])
-        @GraphQLField(of = AddressMetro::class)
+        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = AddressMetro::class)
         val metros: List<AddressMetro>
 ) {
+    @GraphQLInputObject(name = "AddressInput")
+    constructor(
+            @GraphQLInputField(name = "description") description: String,
+            @GraphQLInputField(name = "lat") lat: Double,
+            @GraphQLInputField(name = "lon") lon: Double) :
+            this(description = description, lat = lat, lon = lon, metros = emptyList())
+
     constructor() : this(lat = 0.0, lon = 0.0, description = "", metros = ArrayList())
 }

@@ -17,9 +17,17 @@ annotation class GraphQLObject(
 annotation class GraphQLField(
         val name: String = "",
         val description: String = "",
-        val nullable: Boolean = false,
-        val of: KClass<*> = Void::class,
-        val ofNullable: Boolean = false
+        val nullable: Boolean = false
+)
+
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@MustBeDocumented
+@Retention
+annotation class GraphQLComplexField(
+        val name: String = "",
+        val description: String = "",
+        val modifiers: Array<GraphQLModifier>,
+        val type: KClass<*>
 )
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
@@ -30,6 +38,18 @@ annotation class GraphQLArgument(
         val description: String = "",
         val nullable: Boolean = false,
         val default: KClass<out Supplier<out Any>> = DefaultSupplier::class
+)
+
+@Target(AnnotationTarget.VALUE_PARAMETER)
+@MustBeDocumented
+@Retention
+annotation class GraphQLComplexArgument(
+        val name: String,
+        val description: String = "",
+        val nullable: Boolean = false,
+        val default: KClass<out Supplier<out Any>> = DefaultSupplier::class,
+        val modifiers: Array<GraphQLModifier>,
+        val type: KClass<*>
 )
 
 @Target(AnnotationTarget.CONSTRUCTOR)

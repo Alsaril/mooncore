@@ -1,7 +1,10 @@
 package live.luna.entity
 
+import live.luna.graphql.annotations.GraphQLComplexField
 import live.luna.graphql.annotations.GraphQLField
+import live.luna.graphql.annotations.GraphQLModifier
 import live.luna.graphql.annotations.GraphQLObject
+import java.math.BigDecimal
 import java.util.*
 import javax.persistence.*
 
@@ -15,9 +18,10 @@ data class Service(
         @GraphQLField
         val id: Long = 0,
 
-        @Column(name = "name", nullable = false)
+        @ManyToOne
+        @JoinColumn(name = "type", nullable = false)
         @GraphQLField
-        val name: String,
+        val type: ServiceType,
 
         @ManyToOne
         @JoinColumn(name = "master_id", nullable = false)
@@ -26,16 +30,15 @@ data class Service(
 
         @Column(name = "price", nullable = false)
         @GraphQLField
-        val price: Double = 0.0,
+        val price: BigDecimal,
 
         @Column(name = "description", nullable = false, columnDefinition = "TEXT")
         @GraphQLField
         val description: String = "",
 
-        @Column(name = "ctime", nullable = false)
-        @Temporal(TemporalType.TIMESTAMP)
+        @Column(name = "duration", nullable = false)
         @GraphQLField
-        val ctime: Date = Date(),
+        val duration: Long = 0,
 
         @ManyToMany(cascade = [CascadeType.ALL])
         @JoinTable(
@@ -43,7 +46,7 @@ data class Service(
                 joinColumns = [JoinColumn(name = "service_id")],
                 inverseJoinColumns = [JoinColumn(name = "material_id")]
         )
-        @GraphQLField(of = Material::class)
+        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Material::class)
         val materials: List<Material>,
 
         @ManyToMany(cascade = [CascadeType.ALL])
@@ -52,9 +55,14 @@ data class Service(
                 joinColumns = [JoinColumn(name = "service_id")],
                 inverseJoinColumns = [JoinColumn(name = "photo_id")]
         )
-        @GraphQLField(of = Photo::class)
-        val photos: List<Photo>
+        @GraphQLComplexField(modifiers = [GraphQLModifier.NOT_NULL, GraphQLModifier.LIST, GraphQLModifier.NOT_NULL], type = Photo::class)
+        val photos: List<Photo>,
+
+        @Column(name = "ctime", nullable = false)
+        @Temporal(TemporalType.TIMESTAMP)
+        @GraphQLField
+        val ctime: Date = Date()
 
 ) {
-    constructor() : this(name = "", master = Master(), materials = ArrayList(), photos = ArrayList())
+    constructor() : this(price = BigDecimal.ZERO, type = ServiceType(), master = Master(), materials = ArrayList(), photos = ArrayList())
 }
