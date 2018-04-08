@@ -25,20 +25,30 @@ fun buildSchema(queryKlass: Klass, mutationKlass: Klass?): GraphQLSchema {
         processOutput(it, processorContext)
     }
 
-    return GraphQLSchema.newSchema()
+    val schema = GraphQLSchema.newSchema()
             .query(queryObject as GraphQLObjectType)
             .mutation(mutationObject as? GraphQLObjectType)
-            .build()
+            .additionalTypes(processorContext.getInterfaces().map {
+                realInterfaceProcess(it.key, processorContext)
+            }.toSet())
+
+    return schema.build()
 }
 
-private fun processInterface(klass: Klass, context: ProcessorContext): GraphQLInterfaceType {
+private fun processInterface(klass: Klass, context: ProcessorContext): GraphQLTypeReference {
     val annotation = klass.getAnnotation(GraphQLInterface::class.java)
     val name = annotation.name.ifEmptyThen(klass.simpleName)
-    val description = annotation.description.ifEmptyThenNull()
 
     context.setOutputTypeAsProcessing(klass, name)
     context.setInterfaceAsProcessing(klass, name)
 
+    return GraphQLTypeReference(name)
+}
+
+private fun realInterfaceProcess(klass: Klass, context: ProcessorContext): GraphQLInterfaceType {
+    val annotation = klass.getAnnotation(GraphQLInterface::class.java)
+    val name = annotation.name.ifEmptyThen(klass.simpleName)
+    val description = annotation.description.ifEmptyThenNull()
     val builder = GraphQLInterfaceType.newInterface()
             .name(name)
             .description(description)
@@ -51,16 +61,12 @@ private fun processInterface(klass: Klass, context: ProcessorContext): GraphQLIn
         it to context.getOutputType(it, ::processOutput)
     }.toMap()
 
-    val type = builder
+    return builder
             .typeResolver {
                 (implementations[it.getObject<Any>()::class.java] as? GraphQLObjectType)
                         ?: throw GraphQLRuntimeException("Type ${it.getObject<Any>()::class.java.name} doesn't implement interface $name")
             }
             .build()
-
-    context.setOutputTypeAsKnown(klass, type)
-    context.setInterfaceAsKnown(klass, type)
-    return type
 }
 
 private fun processObject(klass: Klass, context: ProcessorContext): GraphQLObjectType {
@@ -82,11 +88,7 @@ private fun processObject(klass: Klass, context: ProcessorContext): GraphQLObjec
     }
 
     annotation.implements.forEach {
-        val type = context.getInterface(it.java, ::processInterface)
-        when (type) {
-            is GraphQLInterfaceType -> builder.withInterface(type)
-            is GraphQLTypeReference -> builder.withInterface(type)
-        }
+        builder.withInterface(context.getInterface(it.java, ::processInterface))
     }
 
     val type = builder.build()

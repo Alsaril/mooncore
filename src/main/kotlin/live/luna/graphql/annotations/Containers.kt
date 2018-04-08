@@ -13,7 +13,6 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
                        private val processingInputTypes: MutableSet<Klass> = mutableSetOf(),
                        private val knownOutputTypes: MutableMap<Klass, GraphQLOutputType> = mutableMapOf(),
                        private val processingOutputTypes: MutableMap<Klass, String> = mutableMapOf(),
-                       private val knownInterfaces: MutableMap<Klass, GraphQLInterfaceType> = mutableMapOf(),
                        private val processingInterfaces: MutableMap<Klass, String> = mutableMapOf(),
                        private val implementations: Map<Klass, List<Klass>>) {
     init {
@@ -92,17 +91,14 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         processingInterfaces[klass] = name
     }
 
-    fun setInterfaceAsKnown(klass: Klass, `interface`: GraphQLInterfaceType) {
-        processingInterfaces.remove(klass)
-        knownInterfaces[klass] = `interface`
-    }
-
-    fun getInterface(klass: Klass, processor: (Klass, ProcessorContext) -> GraphQLInterfaceType) = knownInterfaces[klass]
-            ?: processingInterfaces[klass]?.let { GraphQLTypeReference(it) }
-            ?: processor.invoke(klass, this) as? GraphQLInterfaceType?
+    fun getInterface(klass: Klass, processor: (Klass, ProcessorContext) -> GraphQLTypeReference) =
+            processingInterfaces[klass]?.let { GraphQLTypeReference(it) }
+                    ?: processor.invoke(klass, this) as GraphQLTypeReference?
             ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot create type for ${klass.name}\"")
 
     fun getImplementations(klass: Klass) = implementations[klass] ?: listOf()
+
+    fun getInterfaces() = processingInterfaces
 }
 
 internal data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any?>)
