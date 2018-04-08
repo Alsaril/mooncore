@@ -24,7 +24,9 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         knownInputTypes[java.lang.Character::class.java] = InputTypeWrapper(Scalars.GraphQLChar)
         knownInputTypes[Int::class.java] = InputTypeWrapper(Scalars.GraphQLInt)
         knownInputTypes[java.lang.Integer::class.java] = InputTypeWrapper(Scalars.GraphQLInt)
-        knownInputTypes[Long::class.java] = InputTypeWrapper(Scalars.GraphQLID)
+        knownInputTypes[Long::class.java] = InputTypeWrapper(Scalars.GraphQLID) { _, value ->
+            (value as String).toLong()
+        }
         knownInputTypes[java.lang.Long::class.java] = InputTypeWrapper(Scalars.GraphQLID)
         knownInputTypes[Float::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
         knownInputTypes[java.lang.Float::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
