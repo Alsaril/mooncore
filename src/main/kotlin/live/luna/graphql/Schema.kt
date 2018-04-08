@@ -102,6 +102,11 @@ class Query {
         return serviceTypeService.getAll()
     }
 
+    @GraphQLListField(type = Seance::class)
+    fun clientSeances(@GraphQLContext context: UserContext): List<Seance> {
+        return clientService.getMySeances(context)
+    }
+
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])
     fun viewer(@GraphQLContext context: UserContext): Any? {
         return null

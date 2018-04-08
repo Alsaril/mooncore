@@ -1,6 +1,7 @@
 package live.luna.service.impl
 
 import live.luna.dao.SeanceDao
+import live.luna.entity.Client
 import live.luna.entity.Seance
 import live.luna.service.SeanceService
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,5 +27,9 @@ class SeanceServiceImpl : SeanceService {
 
     override fun getById(id: Long): Seance? {
         return seanceDao.getById(id)
+    }
+
+    override fun getForClient(client: Client): List<Seance> {
+        return seanceDao.getForClient(client)
     }
 }
