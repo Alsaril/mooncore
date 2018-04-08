@@ -1,5 +1,6 @@
 package live.luna.entity
 
+import live.luna.graphql.FeedItem
 import live.luna.graphql.annotations.GraphQLField
 import live.luna.graphql.annotations.GraphQLInputField
 import live.luna.graphql.annotations.GraphQLInputObject
@@ -8,7 +9,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "salon")
-@GraphQLObject
+@GraphQLObject(implements = [FeedItem::class])
 data class Salon(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

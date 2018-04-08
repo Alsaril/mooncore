@@ -64,13 +64,10 @@ constructor(
         var to: Point
 )
 
-@GraphQLInterface(implementedBy = [Master::class, Salon::class])
+@GraphQLInterface
 class FeedItem(
-        @GraphQLField
-        val name: String,
-
-        @GraphQLListField(type = Photo::class)
-        val photos: List<Photo>
+        @GraphQLField(nullable = true)
+        val name: String?
 )
 
 @GraphQLObject

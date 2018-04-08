@@ -1,11 +1,12 @@
 package live.luna.entity
 
+import live.luna.graphql.FeedItem
 import live.luna.graphql.annotations.*
 import javax.persistence.*
 
 @Entity
 @Table(name = "master")
-@GraphQLObject
+@GraphQLObject(implements = [FeedItem::class])
 data class Master(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)

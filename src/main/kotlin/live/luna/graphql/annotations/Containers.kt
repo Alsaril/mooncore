@@ -12,7 +12,10 @@ data class InputTypeWrapper(val type: GraphQLInputType, val creator: InputObject
 class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeWrapper> = mutableMapOf(),
                        private val processingInputTypes: MutableSet<Klass> = mutableSetOf(),
                        private val knownOutputTypes: MutableMap<Klass, GraphQLOutputType> = mutableMapOf(),
-                       private val processingOutputTypes: MutableMap<Klass, String> = mutableMapOf()) {
+                       private val processingOutputTypes: MutableMap<Klass, String> = mutableMapOf(),
+                       private val knownInterfaces: MutableMap<Klass, GraphQLInterfaceType> = mutableMapOf(),
+                       private val processingInterfaces: MutableMap<Klass, String> = mutableMapOf(),
+                       private val implementations: Map<Klass, List<Klass>>) {
     init {
         knownInputTypes[Boolean::class.java] = InputTypeWrapper(Scalars.GraphQLBoolean)
         knownInputTypes[java.lang.Boolean::class.java] = InputTypeWrapper(Scalars.GraphQLBoolean)
@@ -60,19 +63,21 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
 
     fun getInputType(klass: Klass): InputTypeWrapper? = knownInputTypes[klass]
 
-    fun processInput(klass: Klass) {
+    fun setInputAsProcessing(klass: Klass) {
         processingInputTypes.add(klass)
     }
 
-    fun knowInput(klass: Klass, type: GraphQLInputType, creator: InputObjectCreator) {
+    fun setInputAsKnown(klass: Klass, type: GraphQLInputType, creator: InputObjectCreator) {
         processingInputTypes.remove(klass)
         knownInputTypes[klass] = InputTypeWrapper(type, creator)
     }
 
     fun isProcessingInput(klass: Klass) = processingInputTypes.contains(klass)
 
-    fun getOutputType(klass: Klass): GraphQLOutputType? = knownOutputTypes[klass]
+    fun getOutputType(klass: Klass, processor: (Klass, ProcessorContext) -> GraphQLType): GraphQLOutputType? = knownOutputTypes[klass]
             ?: processingOutputTypes[klass]?.let { GraphQLTypeReference(it) }
+            ?: processor.invoke(klass, this) as? GraphQLOutputType?
+            ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot create type for ${klass.name}\"")
 
     fun setOutputTypeAsProcessing(klass: Klass, name: String) {
         processingOutputTypes[klass] = name
@@ -82,6 +87,22 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         processingOutputTypes.remove(klass)
         knownOutputTypes[klass] = type
     }
+
+    fun setInterfaceAsProcessing(klass: Klass, name: String) {
+        processingInterfaces[klass] = name
+    }
+
+    fun setInterfaceAsKnown(klass: Klass, `interface`: GraphQLInterfaceType) {
+        processingInterfaces.remove(klass)
+        knownInterfaces[klass] = `interface`
+    }
+
+    fun getInterface(klass: Klass, processor: (Klass, ProcessorContext) -> GraphQLInterfaceType) = knownInterfaces[klass]
+            ?: processingInterfaces[klass]?.let { GraphQLTypeReference(it) }
+            ?: processor.invoke(klass, this) as? GraphQLInterfaceType?
+            ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot create type for ${klass.name}\"")
+
+    fun getImplementations(klass: Klass) = implementations[klass] ?: listOf()
 }
 
 internal data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any?>)
