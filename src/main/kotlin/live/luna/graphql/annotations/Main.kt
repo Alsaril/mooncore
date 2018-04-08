@@ -1,10 +1,23 @@
 package live.luna.graphql.annotations
 
 import graphql.schema.*
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import java.lang.reflect.*
 
 fun buildSchema(queryKlass: Klass, mutationKlass: Klass?): GraphQLSchema {
-    val processorContext = ProcessorContext()
+    val implementations = mutableMapOf<Klass, MutableList<Klass>>()
+
+    FastClasspathScanner().matchClassesWithAnnotation(GraphQLObject::class.java) { klass ->
+        val annotation = klass.getAnnotation(GraphQLObject::class.java)
+                ?: throw IllegalStateException("Unexpected behavior: class doesn't have annotation @GraphQLObject, but found in scan")
+
+        if (annotation.implements.isEmpty()) return@matchClassesWithAnnotation
+        annotation.implements.forEach {
+            implementations.computeIfAbsent(it.java) { mutableListOf() }.add(klass)
+        }
+    }.scan()
+
+    val processorContext = ProcessorContext(implementations = implementations)
 
     val queryObject = processOutput(queryKlass, processorContext)
 
@@ -18,40 +31,42 @@ fun buildSchema(queryKlass: Klass, mutationKlass: Klass?): GraphQLSchema {
             .build()
 }
 
-private fun processOutput(klass: Klass, context: ProcessorContext): GraphQLType {
-    klass.getAnnotation(GraphQLInterface::class.java)?.let {
-        val name = it.name.ifEmptyThen(klass.simpleName)
-        val description = it.description.ifEmptyThenNull()
+private fun processInterface(klass: Klass, context: ProcessorContext): GraphQLInterfaceType {
+    val annotation = klass.getAnnotation(GraphQLInterface::class.java)
+    val name = annotation.name.ifEmptyThen(klass.simpleName)
+    val description = annotation.description.ifEmptyThenNull()
 
-        context.setOutputTypeAsProcessing(klass, name)
+    context.setOutputTypeAsProcessing(klass, name)
+    context.setInterfaceAsProcessing(klass, name)
 
-        val builder = GraphQLInterfaceType.newInterface()
-                .name(name)
-                .description(description)
+    val builder = GraphQLInterfaceType.newInterface()
+            .name(name)
+            .description(description)
 
-        klass.declaredFields.forEach {
-            processEntity(true, it, context)?.let { builder.field(it) }
-        }
-
-        val descendants: Map<Klass, GraphQLType> = it.implementedBy.map {
-            it.java to (context.getOutputType(it.java) as? GraphQLType ?: processOutput(it.java, context))
-        }.toMap()
-
-        val type = builder
-                .typeResolver {
-                    (descendants[it.getObject<Any>()::class.java] as? GraphQLObjectType)
-                            ?: throw GraphQLRuntimeException("Type ${it.getObject<Any>()::class.java.name} doesn't implement interface $name")
-                }
-                .build()
-        context.setOutputTypeAsKnown(klass, type)
-        return type
+    klass.declaredFields.forEach {
+        processEntity(true, it, context)?.let { builder.field(it) }
     }
 
-    val klassAnnotation = klass.getAnnotation(GraphQLObject::class.java)
-            ?: throw GraphQLSchemaBuilderException("${klass.name} class isn't annotated with 'GraphQLObject', but expected to be")
+    val implementations = context.getImplementations(klass).map {
+        it to context.getOutputType(it, ::processOutput)
+    }.toMap()
 
-    val name = klassAnnotation.name.ifEmptyThen(klass.simpleName)
-    val description = klassAnnotation.description.ifEmptyThenNull()
+    val type = builder
+            .typeResolver {
+                (implementations[it.getObject<Any>()::class.java] as? GraphQLObjectType)
+                        ?: throw GraphQLRuntimeException("Type ${it.getObject<Any>()::class.java.name} doesn't implement interface $name")
+            }
+            .build()
+
+    context.setOutputTypeAsKnown(klass, type)
+    context.setInterfaceAsKnown(klass, type)
+    return type
+}
+
+private fun processObject(klass: Klass, context: ProcessorContext): GraphQLObjectType {
+    val annotation = klass.getAnnotation(GraphQLObject::class.java)
+    val name = annotation.name.ifEmptyThen(klass.simpleName)
+    val description = annotation.description.ifEmptyThenNull()
 
     context.setOutputTypeAsProcessing(klass, name)
 
@@ -66,9 +81,32 @@ private fun processOutput(klass: Klass, context: ProcessorContext): GraphQLType 
         processEntity(false, it, context)?.let { builder.field(it) }
     }
 
+    annotation.implements.forEach {
+        val type = context.getInterface(it.java, ::processInterface)
+        when (type) {
+            is GraphQLInterfaceType -> builder.withInterface(type)
+            is GraphQLTypeReference -> builder.withInterface(type)
+        }
+    }
+
     val type = builder.build()
     context.setOutputTypeAsKnown(klass, type)
     return type
+}
+
+private fun processOutput(klass: Klass, context: ProcessorContext): GraphQLType {
+    val interfaceAnnotation = klass.getAnnotation(GraphQLInterface::class.java)
+    val objectAnnotation = klass.getAnnotation(GraphQLObject::class.java)
+
+    if (interfaceAnnotation != null && objectAnnotation != null) {
+        throw GraphQLSchemaBuilderException("Annotations @GraphQLInterface and @GraphQLObject can't be combined")
+    }
+
+    if (interfaceAnnotation == null && objectAnnotation == null) {
+        throw GraphQLSchemaBuilderException("Class ${klass.name} should be annotated with @GraphQLInterface or @GraphQLObject")
+    }
+
+    return if (interfaceAnnotation != null) processInterface(klass, context) else processObject(klass, context)
 }
 
 private fun modifyType(type: GraphQLType, depth: Int) = (1..depth).fold(type, { acc, _ -> GraphQLList(GraphQLNonNull(acc)) })
@@ -93,15 +131,11 @@ private fun processEntity(isField: Boolean, member: AccessibleObject, context: P
     val klass = if (isField) (member as Field).type else (member as Method).returnType // this too
     val baseKlass = if (isSimple) klass else complexAnnotation!!.type.java // autodetect not null type, constraints
 
-    if (context.getOutputType(baseKlass) == null) {
-        processOutput(baseKlass, context)
-    }
-
     val name = (if (isSimple) simpleAnnotation!!.name else complexAnnotation!!.name)
             .ifEmptyThen((member as Member).name)
     val description = (if (isSimple) simpleAnnotation!!.description else complexAnnotation!!.description)
             .ifEmptyThenNull()
-    val baseType = context.getOutputType(baseKlass)
+    val baseType = context.getOutputType(baseKlass, ::processOutput)
             ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot get type for ${baseKlass.name}")
     val nullable = if (isSimple) simpleAnnotation!!.nullable else complexAnnotation!!.nullable
     val type = if (isSimple) baseType else modifyType(baseType, complexAnnotation!!.depth)
@@ -188,7 +222,7 @@ private fun getInputType(klass: Klass, context: ProcessorContext): InputTypeWrap
     val name = annotation.name.ifEmptyThen(klass.simpleName)
     val description = annotation.description.ifEmptyThenNull()
 
-    context.processInput(klass)
+    context.setInputAsProcessing(klass)
 
     val builder = GraphQLInputObjectType.newInputObject()
             .name(name)
@@ -212,7 +246,7 @@ private fun getInputType(klass: Klass, context: ProcessorContext): InputTypeWrap
     }
 
     val type = builder.build()
-    context.knowInput(klass, type, creator)
+    context.setInputAsKnown(klass, type, creator)
     return context.getInputType(klass)!!
 }
 

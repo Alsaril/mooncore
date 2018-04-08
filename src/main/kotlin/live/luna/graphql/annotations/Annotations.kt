@@ -8,7 +8,8 @@ import kotlin.reflect.KClass
 @Retention
 annotation class GraphQLObject(
         val name: String = "",
-        val description: String = ""
+        val description: String = "",
+        val implements: Array<KClass<*>> = []
 )
 
 @Target(AnnotationTarget.CLASS)
@@ -16,8 +17,7 @@ annotation class GraphQLObject(
 @Retention
 annotation class GraphQLInterface(
         val name: String = "",
-        val description: String = "",
-        val implementedBy: Array<KClass<*>>
+        val description: String = ""
 )
 
 @Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
