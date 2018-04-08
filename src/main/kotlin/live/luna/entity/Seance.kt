@@ -1,6 +1,7 @@
 package live.luna.entity
 
 import live.luna.graphql.annotations.GraphQLField
+import live.luna.graphql.annotations.GraphQLListField
 import live.luna.graphql.annotations.GraphQLObject
 import java.util.*
 import javax.persistence.*
@@ -31,7 +32,7 @@ data class Seance(
                 joinColumns = [JoinColumn(name = "seance_id")],
                 inverseJoinColumns = [JoinColumn(name = "service_id")]
         )
-        @GraphQLField(of = Service::class)
+        @GraphQLListField(type = Service::class)
         val services: List<Service>,
 
         @Column(name = "start_time", nullable = false)
@@ -47,4 +48,34 @@ data class Seance(
 ) {
     constructor() : this(master = Master(), client = Client(),
             services = emptyList(), startTime = Date(), endTime = Date())
+
+
+    class Builder() {
+        var id: Long = 0
+        var master: Master? = null
+        var client: Client? = null
+        var startTime: Date? = null
+        var endTime: Date? = null
+        var services: List<Service> = emptyList()
+
+        fun build() = Seance(
+                id = id,
+                master = master ?: throw NullPointerException("You have to provide non-null master field"),
+                client = client ?: throw NullPointerException("You have to provide non-null client field"),
+                startTime = startTime ?: throw NullPointerException("You have to provide non-null startTime field"),
+                endTime = endTime ?: throw NullPointerException("You have to provide non-null endTime field"),
+                services = services
+        )
+
+        companion object {
+            fun from(seance: Seance) = Builder().apply {
+                id = seance.id
+                master = seance.master
+                client = seance.client
+                startTime = seance.startTime
+                endTime = seance.endTime
+                services = seance.services
+            }
+        }
+    }
 }

@@ -159,4 +159,13 @@ class Mutation {
                       @GraphQLContext context: UserContext): Service? {
         return serviceService.removeService(serviceId, context)
     }
+
+    @GraphQLField(nullable = true)
+    fun makeAnAppointment(@GraphQLArgument(name = "master_id") masterId: Long,
+                          @GraphQLListArgument(name = "services_id", type = Long::class) servicesId: List<Long>,
+                          @GraphQLArgument(name = "start_time") startTime: Date,
+                          @GraphQLArgument(name = "end_time") endTime: Date,
+                          @GraphQLContext context: UserContext): Seance? {
+        return clientService.makeAnAppointment(masterId, servicesId, startTime, endTime, context)
+    }
 }

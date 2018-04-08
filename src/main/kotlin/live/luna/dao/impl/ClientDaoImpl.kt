@@ -30,4 +30,17 @@ class ClientDaoImpl : ClientDao {
     override fun getById(id: Long): Client? {
         return em.find(Client::class.java, id)
     }
+
+    override fun getByUserId(userId: Long): Client? {
+        val query = em.criteriaBuilder.createQuery(Client::class.java)
+        val root = query.from(Client::class.java)
+        query
+                .select(root)
+                .where(em.criteriaBuilder.equal(root.get<Client>("user").get<Long>("id"), userId))
+
+        return em.createQuery(query)
+                .resultList
+                .takeIf { it.isNotEmpty() }
+                ?.let { return it[0] }
+    }
 }
