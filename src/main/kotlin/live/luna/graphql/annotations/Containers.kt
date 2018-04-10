@@ -12,7 +12,9 @@ data class InputTypeWrapper(val type: GraphQLInputType, val creator: InputObject
 class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeWrapper> = mutableMapOf(),
                        private val processingInputTypes: MutableSet<Klass> = mutableSetOf(),
                        private val knownOutputTypes: MutableMap<Klass, GraphQLOutputType> = mutableMapOf(),
-                       private val processingOutputTypes: MutableMap<Klass, String> = mutableMapOf()) {
+                       private val processingOutputTypes: MutableMap<Klass, String> = mutableMapOf(),
+                       private val processingInterfaces: MutableMap<Klass, String> = mutableMapOf(),
+                       private val implementations: Map<Klass, List<Klass>>) {
     init {
         knownInputTypes[Boolean::class.java] = InputTypeWrapper(Scalars.GraphQLBoolean)
         knownInputTypes[java.lang.Boolean::class.java] = InputTypeWrapper(Scalars.GraphQLBoolean)
@@ -24,7 +26,9 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         knownInputTypes[java.lang.Character::class.java] = InputTypeWrapper(Scalars.GraphQLChar)
         knownInputTypes[Int::class.java] = InputTypeWrapper(Scalars.GraphQLInt)
         knownInputTypes[java.lang.Integer::class.java] = InputTypeWrapper(Scalars.GraphQLInt)
-        knownInputTypes[Long::class.java] = InputTypeWrapper(Scalars.GraphQLID)
+        knownInputTypes[Long::class.java] = InputTypeWrapper(Scalars.GraphQLID) { _, value ->
+            (value as String).toLong()
+        }
         knownInputTypes[java.lang.Long::class.java] = InputTypeWrapper(Scalars.GraphQLID)
         knownInputTypes[Float::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
         knownInputTypes[java.lang.Float::class.java] = InputTypeWrapper(Scalars.GraphQLFloat)
@@ -58,28 +62,43 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
 
     fun getInputType(klass: Klass): InputTypeWrapper? = knownInputTypes[klass]
 
-    fun processInput(klass: Klass) {
+    fun setInputAsProcessing(klass: Klass) {
         processingInputTypes.add(klass)
     }
 
-    fun knowInput(klass: Klass, type: GraphQLInputType, creator: InputObjectCreator) {
+    fun setInputAsKnown(klass: Klass, type: GraphQLInputType, creator: InputObjectCreator) {
         processingInputTypes.remove(klass)
         knownInputTypes[klass] = InputTypeWrapper(type, creator)
     }
 
     fun isProcessingInput(klass: Klass) = processingInputTypes.contains(klass)
 
-    fun getOutputType(klass: Klass): GraphQLOutputType? = knownOutputTypes[klass]
+    fun getOutputType(klass: Klass, processor: (Klass, ProcessorContext) -> GraphQLType): GraphQLOutputType? = knownOutputTypes[klass]
             ?: processingOutputTypes[klass]?.let { GraphQLTypeReference(it) }
+            ?: processor.invoke(klass, this) as? GraphQLOutputType?
+            ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot create type for ${klass.name}\"")
 
-    fun processOutput(klass: Klass, name: String) {
+    fun setOutputTypeAsProcessing(klass: Klass, name: String) {
         processingOutputTypes[klass] = name
     }
 
-    fun knowOutput(klass: Klass, type: GraphQLOutputType) {
+    fun setOutputTypeAsKnown(klass: Klass, type: GraphQLOutputType) {
         processingOutputTypes.remove(klass)
         knownOutputTypes[klass] = type
     }
+
+    fun setInterfaceAsProcessing(klass: Klass, name: String) {
+        processingInterfaces[klass] = name
+    }
+
+    fun getInterface(klass: Klass, processor: (Klass, ProcessorContext) -> GraphQLTypeReference) =
+            processingInterfaces[klass]?.let { GraphQLTypeReference(it) }
+                    ?: processor.invoke(klass, this) as GraphQLTypeReference?
+            ?: throw GraphQLSchemaBuilderException("Unexpected behaviour: cannot create type for ${klass.name}\"")
+
+    fun getImplementations(klass: Klass) = implementations[klass] ?: listOf()
+
+    fun getInterfaces() = processingInterfaces
 }
 
 internal data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any?>)

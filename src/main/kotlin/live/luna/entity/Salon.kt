@@ -1,12 +1,12 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLObject
+import live.luna.graphql.FeedItem
+import live.luna.graphql.annotations.*
 import javax.persistence.*
 
 @Entity
 @Table(name = "salon")
-@GraphQLObject
+@GraphQLObject(implements = [FeedItem::class])
 data class Salon(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,8 +29,9 @@ data class Salon(
         val avatar: Photo,
 
         @OneToMany(mappedBy = "salon", cascade = [CascadeType.ALL])
-        @GraphQLField(of = Master::class)
+        @GraphQLListField(type = Master::class)
         val masters: List<Master>
 ) {
+
     constructor() : this(address = Address(), avatar = Photo(), name = "", masters = emptyList())
 }

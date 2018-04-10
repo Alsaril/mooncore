@@ -30,4 +30,25 @@ class ServiceTypeDaoImpl : ServiceTypeDao {
     override fun getById(id: Long): ServiceType? {
         return em.find(ServiceType::class.java, id)
     }
+
+    override fun getAll(): List<ServiceType> {
+        val query = em.criteriaBuilder.createQuery(ServiceType::class.java)
+        val root = query.from(ServiceType::class.java)
+        query.select(root)
+        return em.createQuery(query).resultList
+    }
+
+    override fun getByName(name: String): ServiceType? {
+        val query = em.criteriaBuilder.createQuery(ServiceType::class.java)
+
+        val root = query.from(ServiceType::class.java)
+        query
+                .select(root)
+                .where(em.criteriaBuilder.equal(root.get<ServiceType>("name"), name))
+
+        return em.createQuery(query)
+                .resultList
+                .takeIf { it.isNotEmpty() }
+                ?.let { return it[0] }
+    }
 }

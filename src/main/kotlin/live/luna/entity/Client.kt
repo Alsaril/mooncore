@@ -1,6 +1,7 @@
 package live.luna.entity
 
 import live.luna.graphql.annotations.GraphQLField
+import live.luna.graphql.annotations.GraphQLListField
 import live.luna.graphql.annotations.GraphQLObject
 import javax.persistence.*
 
@@ -14,9 +15,9 @@ data class Client(
         @GraphQLField
         val id: Long = 0,
 
-        @Column(name = "name", nullable = false)
-        @GraphQLField
-        val name: String,
+        @Column(name = "name", nullable = true)
+        @GraphQLField(nullable = true)
+        val name: String?,
 
         @OneToOne
         @JoinColumn(name = "user_id", nullable = false)
@@ -34,9 +35,9 @@ data class Client(
                 joinColumns = [JoinColumn(name = "client_id")],
                 inverseJoinColumns = [JoinColumn(name = "master_id")]
         )
-        @GraphQLField(of = Master::class)
+        @GraphQLListField(type = Master::class)
         val favorites: List<Master> = listOf()
 
 ) {
-    constructor() : this(user = User(), avatar = Photo(), name = "", favorites = ArrayList())
+    constructor() : this(user = User(), avatar = null, name = null)
 }
