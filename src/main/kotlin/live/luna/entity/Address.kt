@@ -25,7 +25,7 @@ data class Address(
         @GraphQLField
         val description: String,
 
-        @OneToMany(mappedBy = "address", cascade = [CascadeType.ALL])
+        @OneToMany
         @GraphQLListField(type = AddressMetro::class)
         val metros: List<AddressMetro>
 ) {

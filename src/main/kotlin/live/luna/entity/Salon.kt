@@ -2,8 +2,7 @@ package live.luna.entity
 
 import live.luna.graphql.FeedItem
 import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLInputField
-import live.luna.graphql.annotations.GraphQLInputObject
+import live.luna.graphql.annotations.GraphQLListField
 import live.luna.graphql.annotations.GraphQLObject
 import javax.persistence.*
 
@@ -27,21 +26,34 @@ data class Salon(
         val address: Address,
 
         @OneToOne
-        @JoinColumn(name = "photo_id", nullable = false)
+        @JoinColumn(name = "avatar_id", nullable = false)
         @GraphQLField
-        val photo: Photo,
+        val avatar: Photo,
 
-        @Column(name = "stars", nullable = false)
-        @GraphQLField
-        val stars: Int = 0
-
+        @OneToMany(mappedBy = "salon", cascade = [CascadeType.ALL])
+        @GraphQLListField(type = Master::class)
+        val masters: List<Master>
 ) {
-    @GraphQLInputObject(name = "SalonInput")
-    constructor(
-            @GraphQLInputField(name = "name") name: String,
-            @GraphQLInputField(name = "address") address: Address,
-            @GraphQLInputField(name = "photo") photo: Photo) :
-            this(id = 0, name = name, address = address, photo = photo)
 
-    constructor() : this(address = Address(), photo = Photo(), name = "")
+    @GraphQLListField(type = Photo::class)
+    fun photos(): List<Photo> {
+        return masters.flatMap { it.photos }
+    }
+
+    @GraphQLField
+    fun stars(): Int {
+        return masters.map { it.stars }.sum() / masters.size
+    }
+
+    @GraphQLListField(type = Sign::class)
+    fun signs(): List<Sign> {
+        return masters.flatMap { it.signs }.distinctBy { it.id }
+    }
+
+    @GraphQLListField(type = Service::class)
+    fun services(): List<Service> {
+        return masters.flatMap { it.services }.distinctBy { it.id }
+    }
+
+    constructor() : this(address = Address(), avatar = Photo(), name = "", masters = emptyList())
 }
