@@ -87,6 +87,15 @@ data class Master(
             salon = null
     )
 
+    fun supportAllServiceTypes(serviceTypes: List<Long>): Boolean {
+        serviceTypes.forEach { type ->
+            if (!services.map { it.type.id }.contains(type)) {
+                return false
+            }
+        }
+        return true
+    }
+
     class Builder() {
         private var id: Long = 0
         private var name: String? = null

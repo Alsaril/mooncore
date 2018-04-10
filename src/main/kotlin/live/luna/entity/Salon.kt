@@ -35,7 +35,7 @@ data class Salon(
 
     @GraphQLListField(type = Photo::class)
     fun photos(): List<Photo> {
-        return masters.flatMap { it.photos }
+        return masters.flatMap { it.photos }.shuffled().take(10)
     }
 
     @GraphQLField
