@@ -8,7 +8,7 @@ data class MetroStation(
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         @Column(name = "id", nullable = false)
-        val id: Int = 0,
+        val id: Long = 0,
 
         @Column(name = "name", nullable = false)
         val name: String,
