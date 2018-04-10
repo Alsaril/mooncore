@@ -95,6 +95,11 @@ class Query {
         return masterService.getById(id)
     }
 
+    @GraphQLField(nullable = true)
+    fun salon(@GraphQLArgument(name = "id") id: Long): Salon? {
+        return salonService.getById(id)
+    }
+
     @GraphQLListField(type = FeedItem::class)
     fun feed(@GraphQLArgument("limit") limit: Limit,
              @GraphQLArgument("area", nullable = true) area: Area?,
