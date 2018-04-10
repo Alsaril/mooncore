@@ -3,12 +3,13 @@ package live.luna
 import graphql.GraphQL
 import live.luna.auth.AuthHelper
 import live.luna.auth.AuthInterceptor
+import live.luna.entity.AddressMetro
+import live.luna.entity.MetroStation
 import live.luna.entity.ServiceType
 import live.luna.graphql.Mutation
 import live.luna.graphql.Query
 import live.luna.graphql.annotations.buildSchema
-import live.luna.service.ServiceTypeService
-import live.luna.service.UserService
+import live.luna.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import java.util.*
 import javax.annotation.PostConstruct
 
 @SpringBootApplication
@@ -24,7 +26,11 @@ class Application
 @Autowired
 constructor(private val userService: UserService,
             private val authHelper: AuthHelper,
-            private val serviceTypeService: ServiceTypeService) {
+            private val serviceTypeService: ServiceTypeService,
+            private val addressService: AddressService,
+            private val addressMetrosService: AddressMetroService,
+            private val stationsService: MetroStationService,
+            private val linesService: MetroLineService) {
 
     @PostConstruct
     fun init() {
@@ -35,6 +41,29 @@ constructor(private val userService: UserService,
             fillServiceTypes()
         }
     }
+
+
+    private fun fillMetros() {
+        val stations = ArrayList<MetroStation>()
+        for (i in 0..0) {
+            stations.add(stationsService.getById(i.toLong())!!)
+        }
+
+
+        for (i in 442..442) {
+            val address = addressService.getById(i.toLong())!!
+
+            val station = stations.random()!!
+
+            val addressMetro = AddressMetro(address = address, station = station.name, line = station.line.name,
+                    color = station.line.color, distance = Random().nextInt(8000).toDouble())
+
+            addressMetrosService.insert(addressMetro)
+        }
+    }
+
+    fun <E> List<E>.random(): E? = if (size > 0) get(Random().nextInt(size)) else null
+
 
     @Configuration
     @EnableWebMvc
