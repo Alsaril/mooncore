@@ -70,10 +70,10 @@ class FeedItem(
         val id: Long,
         @GraphQLField(nullable = true)
         val name: String?,
-        @GraphQLField
-        val address: Address,
-        @GraphQLField
-        val avatar: Photo,
+        @GraphQLField(nullable = true)
+        val address: Address?,
+        @GraphQLField(nullable = true)
+        val avatar: Photo?,
         @GraphQLListField(type = Photo::class)
         val photos: List<Photo>,
         @GraphQLField
