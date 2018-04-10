@@ -14,6 +14,10 @@ data class AddressMetro(
         @GraphQLField
         val id: Long = 0,
 
+        @ManyToOne
+        @JoinColumn(name = "address_id", nullable = false)
+        val address: Address,
+
         @Column(name = "station", nullable = false)
         @GraphQLField
         val station: String,
@@ -31,5 +35,5 @@ data class AddressMetro(
         val distance: Double
 
 ) {
-    constructor() : this(station = "", line = "", color = "", distance = 0.0)
+    constructor() : this(address = Address(), station = "", line = "", color = "", distance = 0.0)
 }
