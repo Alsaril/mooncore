@@ -5,6 +5,7 @@ import graphql.schema.*
 import graphql.schema.GraphQLArgument
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.text.SimpleDateFormat
 import java.util.*
 
 data class InputTypeWrapper(val type: GraphQLInputType, val creator: InputObjectCreator? = null)
@@ -37,6 +38,10 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
         knownInputTypes[String::class.java] = InputTypeWrapper(Scalars.GraphQLString)
         knownInputTypes[BigDecimal::class.java] = InputTypeWrapper(Scalars.GraphQLBigDecimal)
         knownInputTypes[BigInteger::class.java] = InputTypeWrapper(Scalars.GraphQLBigInteger)
+        knownInputTypes[Date::class.java] = InputTypeWrapper(Scalars.GraphQLString) { _, value ->
+            val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss") // TODO may be timezone?
+            formatter.parse(value as String)
+        }
 
         knownOutputTypes[Boolean::class.java] = Scalars.GraphQLBoolean
         knownOutputTypes[java.lang.Boolean::class.java] = Scalars.GraphQLBoolean

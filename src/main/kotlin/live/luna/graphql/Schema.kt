@@ -6,8 +6,10 @@ import live.luna.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.util.*
 
 lateinit var masterService: MasterService
+lateinit var clientService: ClientService
 lateinit var userService: UserService
 lateinit var salonService: SalonService
 lateinit var serviceTypeService: ServiceTypeService
@@ -20,7 +22,8 @@ class Initter
         _userService: UserService,
         _salonService: SalonService,
         _serviceTypeService: ServiceTypeService,
-        _serviceService: ServiceService
+        _serviceService: ServiceService,
+        _clientService: ClientService
 ) {
     init {
         masterService = _masterService
@@ -28,6 +31,7 @@ class Initter
         salonService = _salonService
         serviceTypeService = _serviceTypeService
         serviceService = _serviceService
+        clientService = _clientService
     }
 }
 
@@ -119,6 +123,11 @@ class Query {
         return serviceTypeService.getAll()
     }
 
+    @GraphQLListField(type = Seance::class)
+    fun clientSeances(@GraphQLContext context: UserContext): List<Seance> {
+        return clientService.getMySeances(context)
+    }
+
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])
     fun viewer(@GraphQLContext context: UserContext): Any? {
         return null
@@ -175,5 +184,14 @@ class Mutation {
     fun removeService(@GraphQLArgument("service_id") serviceId: Long,
                       @GraphQLContext context: UserContext): Service? {
         return serviceService.removeService(serviceId, context)
+    }
+
+    @GraphQLField(nullable = true)
+    fun makeAnAppointment(@GraphQLArgument(name = "master_id") masterId: Long,
+                          @GraphQLListArgument(name = "services_id", type = Long::class) servicesId: List<Long>,
+                          @GraphQLArgument(name = "start_time") startTime: Date,
+                          @GraphQLArgument(name = "end_time") endTime: Date,
+                          @GraphQLContext context: UserContext): Seance? {
+        return clientService.makeAnAppointment(masterId, servicesId, startTime, endTime, context)
     }
 }
