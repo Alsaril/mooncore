@@ -2,16 +2,14 @@ package live.luna.graphql
 
 import live.luna.entity.*
 import live.luna.graphql.annotations.*
-import live.luna.service.MasterService
-import live.luna.service.ServiceService
-import live.luna.service.ServiceTypeService
-import live.luna.service.UserService
+import live.luna.service.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
 lateinit var masterService: MasterService
 lateinit var userService: UserService
+lateinit var salonService: SalonService
 lateinit var serviceTypeService: ServiceTypeService
 lateinit var serviceService: ServiceService
 
@@ -20,12 +18,14 @@ class Initter
 @Autowired constructor(
         _masterService: MasterService,
         _userService: UserService,
+        _salonService: SalonService,
         _serviceTypeService: ServiceTypeService,
         _serviceService: ServiceService
 ) {
     init {
         masterService = _masterService
         userService = _userService
+        salonService = _salonService
         serviceTypeService = _serviceTypeService
         serviceService = _serviceService
     }
@@ -84,7 +84,14 @@ class Query {
              @GraphQLListArgument("service_types",
                      type = Long::class,
                      nullable = true) serviceTypes: List<Long>?): List<Any> {
-        return listOf(Salon(), Master(), Master())//masterService.getList(limit, area, prevArea, serviceTypes)
+
+        // TODO exclude masters from the feed if they are already inside salon
+        // TODO filter salon by service types
+
+        val resultList = ArrayList<Any>()
+        resultList.addAll(masterService.getList(limit, area, prevArea, serviceTypes))
+        resultList.addAll(salonService.getList(limit, area, prevArea))
+        return resultList.shuffled()
     }
 
     @GraphQLListField(type = Point::class)

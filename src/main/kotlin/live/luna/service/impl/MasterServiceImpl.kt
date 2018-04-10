@@ -73,7 +73,7 @@ class MasterServiceImpl : MasterService {
         }
         master.salon?.let {
             addressDao.insert(it.address)
-            photoDao.insert(it.photo)
+            photoDao.insert(it.avatar)
             salonDao.insert(it)
             builder.setSalon(it)
         }
