@@ -1,9 +1,7 @@
 package live.luna.entity
 
 import live.luna.graphql.FeedItem
-import live.luna.graphql.annotations.GraphQLField
-import live.luna.graphql.annotations.GraphQLListField
-import live.luna.graphql.annotations.GraphQLObject
+import live.luna.graphql.annotations.*
 import javax.persistence.*
 
 @Entity
@@ -54,6 +52,13 @@ data class Salon(
     fun services(): List<Service> {
         return masters.flatMap { it.services }.distinctBy { it.id }
     }
+
+    @GraphQLInputObject(name = "SalonInput")
+    constructor(
+            @GraphQLInputField(name = "name") name: String,
+            @GraphQLInputField(name = "address") address: Address,
+            @GraphQLInputField(name = "avatar") avatar: Photo) :
+            this(id = 0, name = name, address = address, avatar = avatar, masters = emptyList())
 
     constructor() : this(address = Address(), avatar = Photo(), name = "", masters = emptyList())
 }
