@@ -40,7 +40,7 @@ data class Salon(
 
     @GraphQLField
     fun stars(): Int {
-        return masters.map { it.stars }.sum() / masters.size
+        return if (masters.isEmpty()) 0 else masters.map { it.stars }.sum() / masters.size
     }
 
     @GraphQLListField(type = Sign::class)
