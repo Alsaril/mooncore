@@ -109,7 +109,11 @@ class Query {
         val resultList = ArrayList<Any>()
         resultList.addAll(salonService.getList(limit, area, prevArea, serviceTypes))
         resultList.addAll(masterService.getList(limit, area, prevArea, serviceTypes))
-        return resultList.shuffled().take(limit.limit)
+
+        if (limit.offset >= resultList.size) {
+            return emptyList()
+        }
+        return resultList.shuffled().subList(limit.offset, resultList.size).take(limit.limit)
     }
 
     @GraphQLListField(type = ServiceType::class)

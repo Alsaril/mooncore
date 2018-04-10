@@ -84,11 +84,11 @@ class SalonDaoImpl : SalonDao {
                 it.masters.any { it.supportAllServiceTypes(serviceTypes) }
             }
 
-            filteredByServices.subList(limit.offset, filteredByServices.size).take(limit.limit)
+            filteredByServices //.subList(limit.offset, filteredByServices.size).take(limit.limit)
         } else {
             val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
-            typedQuery.firstResult = limit.offset
-            typedQuery.maxResults = limit.limit
+//            typedQuery.firstResult = limit.offset
+//            typedQuery.maxResults = limit.limit
             typedQuery.resultList
         }
     }

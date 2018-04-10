@@ -94,11 +94,11 @@ class MasterDaoImpl : MasterDao {
         return if (serviceTypes?.isNotEmpty() == true) {
             val resultList = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray())).resultList
             val filtered = resultList.filter { it.supportAllServiceTypes(serviceTypes) }
-            filtered.subList(limit.offset, filtered.size).take(limit.limit)
+            filtered //.subList(limit.offset, filtered.size).take(limit.limit)
         } else {
             val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
-            typedQuery.firstResult = limit.offset
-            typedQuery.maxResults = limit.limit
+//            typedQuery.firstResult = limit.offset
+//            typedQuery.maxResults = limit.limit
             typedQuery.resultList
         }
     }
