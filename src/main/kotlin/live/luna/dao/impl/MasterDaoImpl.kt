@@ -3,7 +3,6 @@ package live.luna.dao.impl
 import live.luna.dao.MasterDao
 import live.luna.entity.Address
 import live.luna.entity.Master
-import live.luna.entity.Service
 import live.luna.graphql.Area
 import live.luna.graphql.Limit
 import org.springframework.stereotype.Repository
@@ -90,15 +89,30 @@ class MasterDaoImpl : MasterDao {
             }
         }
 
-        if (serviceTypes?.isNotEmpty() == true) {
-            // TODO optimize it to avoid distinct below
-            val join = root.join<Master, Service>("services")
-            predicates.add(join.get<Service>("type").get<Long>("id").`in`(serviceTypes))
-        }
 
         val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
         typedQuery.firstResult = limit.offset
         typedQuery.maxResults = limit.limit
-        return typedQuery.resultList.distinct()
+        val resultList = typedQuery.resultList
+
+        // TODO rewrite with HQL or SQL
+        if (serviceTypes != null) {
+            val filtered = ArrayList<Master>()
+            resultList.forEach { master ->
+                var ok = true
+                serviceTypes.forEach { type ->
+                    if (!master.services.map { it.type.id }.contains(type)) {
+                        ok = false
+                    }
+                }
+                if (ok) {
+                    filtered.add(master)
+                }
+            }
+
+            return filtered
+        } else {
+            return resultList
+        }
     }
 }
