@@ -66,8 +66,22 @@ constructor(
 
 @GraphQLInterface
 class FeedItem(
+        @GraphQLField
+        val id: Long,
         @GraphQLField(nullable = true)
-        val name: String?
+        val name: String?,
+        @GraphQLField
+        val address: Address,
+        @GraphQLField
+        val avatar: Photo,
+        @GraphQLListField(type = Photo::class)
+        val photos: List<Photo>,
+        @GraphQLField
+        val stars: Int,
+        @GraphQLListField(type = Sign::class)
+        val signs: List<Sign>,
+        @GraphQLListField(type = Service::class)
+        val services: List<Service>
 )
 
 @GraphQLObject
