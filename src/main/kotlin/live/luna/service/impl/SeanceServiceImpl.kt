@@ -6,6 +6,7 @@ import live.luna.entity.Seance
 import live.luna.service.SeanceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class SeanceServiceImpl : SeanceService {
@@ -29,7 +30,11 @@ class SeanceServiceImpl : SeanceService {
         return seanceDao.getById(id)
     }
 
-    override fun getForClient(client: Client): List<Seance> {
-        return seanceDao.getForClient(client)
+    override fun getClientSeances(client: Client): List<Seance> {
+        return seanceDao.getClientSeances(client)
+    }
+
+    override fun getMasterSeancesInRange(masterId: Long, startTime: Date, endTime: Date): List<Seance> {
+        return seanceDao.getMasterSeancesInRange(masterId, startTime, endTime)
     }
 }

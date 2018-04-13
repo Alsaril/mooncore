@@ -61,7 +61,15 @@ data class Master(
 
         @OneToMany(mappedBy = "master", cascade = [CascadeType.ALL])
         @GraphQLListField(type = Service::class)
-        val services: List<Service> = listOf()
+        val services: List<Service> = listOf(),
+
+        @OneToMany(mappedBy = "master", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        @GraphQLListField(type = Schedule::class)
+        val schedules: List<Schedule> = listOf(),
+
+        @OneToMany(mappedBy = "master", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+        @GraphQLListField(type = Seance::class)
+        val seances: List<Seance> = listOf()
 
 ) {
     @GraphQLInputObject(name = "MasterInput")

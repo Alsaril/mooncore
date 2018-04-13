@@ -83,6 +83,10 @@ constructor(private val userService: UserService,
 
             val extra = ServiceType(name = "Дополнительные услуги", parent = null)
             insert(extra)
+            val extra1 = ServiceType(name = "Лечебные ванночки", parent = extra)
+            val extra2 = ServiceType(name = "Массаж рук", parent = extra)
+            insert(extra1)
+            insert(extra2)
         }
     }
 

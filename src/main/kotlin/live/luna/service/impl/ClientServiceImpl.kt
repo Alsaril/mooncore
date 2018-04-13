@@ -78,11 +78,11 @@ class ClientServiceImpl : ClientService {
         return seance
     }
 
-    override fun getMySeances(context: UserContext): List<Seance> {
+    override fun getClientSeances(context: UserContext): List<Seance> {
         if (context.user == null) {
             return emptyList()
         }
         val client = clientDao.getByUserId(context.user.id) ?: return emptyList()
-        return seanceService.getForClient(client)
+        return seanceService.getClientSeances(client)
     }
 }
