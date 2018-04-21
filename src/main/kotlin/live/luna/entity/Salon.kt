@@ -35,12 +35,12 @@ data class Salon(
 
     @GraphQLListField(type = Photo::class)
     fun photos(): List<Photo> {
-        return masters.flatMap { it.photos }
+        return masters.flatMap { it.photos }.shuffled().take(10)
     }
 
     @GraphQLField
     fun stars(): Int {
-        return masters.map { it.stars }.sum() / masters.size
+        return if (masters.isEmpty()) 0 else masters.map { it.stars }.sum() / masters.size
     }
 
     @GraphQLListField(type = Sign::class)

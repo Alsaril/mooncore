@@ -91,29 +91,15 @@ class MasterDaoImpl : MasterDao {
 
 
         // TODO rewrite with HQL or SQL
-        if (serviceTypes != null) {
-            val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
-            val resultList = typedQuery.resultList
-
-            val filtered = ArrayList<Master>()
-            resultList.forEach { master ->
-                var ok = true
-                serviceTypes.forEach { type ->
-                    if (!master.services.map { it.type.id }.contains(type)) {
-                        ok = false
-                    }
-                }
-                if (ok) {
-                    filtered.add(master)
-                }
-            }
-
-            return filtered.subList(limit.offset, filtered.size).take(limit.limit)
+        return if (serviceTypes?.isNotEmpty() == true) {
+            val resultList = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray())).resultList
+            val filtered = resultList.filter { it.supportAllServiceTypes(serviceTypes) }
+            filtered //.subList(limit.offset, filtered.size).take(limit.limit)
         } else {
             val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
-            typedQuery.firstResult = limit.offset
-            typedQuery.maxResults = limit.limit
-            return typedQuery.resultList
+//            typedQuery.firstResult = limit.offset
+//            typedQuery.maxResults = limit.limit
+            typedQuery.resultList
         }
     }
 }

@@ -30,7 +30,7 @@ class SalonServiceImpl : SalonService {
         return salonDao.getById(id)
     }
 
-    override fun getList(limit: Limit, area: Area?, prevArea: Area?): List<Salon> {
-        return salonDao.getList(limit, area, prevArea)
+    override fun getList(limit: Limit, area: Area?, prevArea: Area?, serviceTypes: List<Long>?): List<Salon> {
+        return salonDao.getList(limit, area, prevArea, serviceTypes)
     }
 }

@@ -35,19 +35,19 @@ class SalonDaoImpl : SalonDao {
         return em.find(Salon::class.java, id)
     }
 
-    override fun getList(limit: Limit, area: Area?, prevArea: Area?): List<Salon> {
+    override fun getList(limit: Limit, area: Area?, prevArea: Area?, serviceTypes: List<Long>?): List<Salon> {
         if (limit.limit <= 0 || limit.offset < 0) {
             return emptyList()
         }
 
         if (area != null && area.from.lat > area.to.lat) {
             area.from = area.to.also { area.to = area.from }
-            return getList(limit, area, prevArea)
+            return getList(limit, area, prevArea, serviceTypes)
         }
 
         if (prevArea != null && prevArea.from.lat > prevArea.to.lat) {
             prevArea.from = prevArea.to.also { prevArea.to = prevArea.from }
-            return getList(limit, area, prevArea)
+            return getList(limit, area, prevArea, serviceTypes)
         }
 
         val criteriaQuery = em.criteriaBuilder.createQuery(Salon::class.java)
@@ -75,9 +75,21 @@ class SalonDaoImpl : SalonDao {
             }
         }
 
-        val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
-        typedQuery.firstResult = limit.offset
-        typedQuery.maxResults = limit.limit
-        return typedQuery.resultList
+        return if (serviceTypes?.isNotEmpty() == true) {
+            val resultList = em.createQuery(
+                    criteriaQuery.select(root).where(*predicates.toTypedArray())
+            ).resultList
+
+            val filteredByServices = resultList.filter {
+                it.masters.any { it.supportAllServiceTypes(serviceTypes) }
+            }
+
+            filteredByServices //.subList(limit.offset, filteredByServices.size).take(limit.limit)
+        } else {
+            val typedQuery = em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray()))
+//            typedQuery.firstResult = limit.offset
+//            typedQuery.maxResults = limit.limit
+            typedQuery.resultList
+        }
     }
 }

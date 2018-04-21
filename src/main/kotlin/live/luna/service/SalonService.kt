@@ -9,5 +9,5 @@ interface SalonService {
     fun update(salon: Salon)
     fun delete(salon: Salon)
     fun getById(id: Long): Salon?
-    fun getList(limit: Limit, area: Area?, prevArea: Area?): List<Salon>
+    fun getList(limit: Limit, area: Area?, prevArea: Area?, serviceTypes: List<Long>?): List<Salon>
 }

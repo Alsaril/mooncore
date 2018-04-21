@@ -94,8 +94,13 @@ class FeedItem(
 @GraphQLObject
 class Query {
     @GraphQLField(nullable = true)
-    fun master(@GraphQLArgument(name = "id") id: Long, @GraphQLContext context: UserContext): Master? {
+    fun master(@GraphQLArgument(name = "id") id: Long): Master? {
         return masterService.getById(id)
+    }
+
+    @GraphQLField(nullable = true)
+    fun salon(@GraphQLArgument(name = "id") id: Long): Salon? {
+        return salonService.getById(id)
     }
 
     @GraphQLListField(type = FeedItem::class)
@@ -107,18 +112,16 @@ class Query {
                      nullable = true) serviceTypes: List<Long>?): List<Any> {
 
         // TODO exclude masters from the feed if they are already inside salon
-        // TODO filter salon by service types
+        // TODO think about feed algorithm and remove shuffle
 
         val resultList = ArrayList<Any>()
+        resultList.addAll(salonService.getList(limit, area, prevArea, serviceTypes))
         resultList.addAll(masterService.getList(limit, area, prevArea, serviceTypes))
-        resultList.addAll(salonService.getList(limit, area, prevArea))
-        return resultList.shuffled()
-    }
 
-    @GraphQLListField(type = Point::class)
-    fun test(@GraphQLArgument("count") count: Int,
-             @GraphQLListArgument("array", type = Point::class) array: List<Point>): List<Point> {
-        return array
+        if (limit.offset >= resultList.size) {
+            return emptyList()
+        }
+        return resultList.shuffled().subList(limit.offset, resultList.size).take(limit.limit)
     }
 
     @GraphQLListField(type = ServiceType::class)
