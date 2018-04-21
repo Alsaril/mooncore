@@ -13,5 +13,5 @@ interface ClientService {
     fun makeAnAppointment(masterId: Long, servicesId: List<Long>,
                           startTime: Date, endTime: Date, context: UserContext): Seance?
 
-    fun getMySeances(context: UserContext): List<Seance>
+    fun getClientSeances(context: UserContext): List<Seance>
 }

@@ -14,6 +14,7 @@ lateinit var userService: UserService
 lateinit var salonService: SalonService
 lateinit var serviceTypeService: ServiceTypeService
 lateinit var serviceService: ServiceService
+lateinit var scheduleService: ScheduleService
 
 @Component
 class Initter
@@ -23,7 +24,8 @@ class Initter
         _salonService: SalonService,
         _serviceTypeService: ServiceTypeService,
         _serviceService: ServiceService,
-        _clientService: ClientService
+        _clientService: ClientService,
+        _scheduleService: ScheduleService
 ) {
     init {
         masterService = _masterService
@@ -32,6 +34,7 @@ class Initter
         serviceTypeService = _serviceTypeService
         serviceService = _serviceService
         clientService = _clientService
+        scheduleService = _scheduleService
     }
 }
 
@@ -125,7 +128,14 @@ class Query {
 
     @GraphQLListField(type = Seance::class)
     fun clientSeances(@GraphQLContext context: UserContext): List<Seance> {
-        return clientService.getMySeances(context)
+        return clientService.getClientSeances(context)
+    }
+
+    @GraphQLListField(type = ScheduleService.Period::class)
+    fun masterFreeTime(
+            @GraphQLArgument(name = "master_id") masterId: Long,
+            @GraphQLArgument(name = "days") days: Int): List<ScheduleService.Period> {
+        return scheduleService.getMasterFreeTime(masterId, days)
     }
 
     /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])
