@@ -20,7 +20,7 @@ data class Salon(
 
         @ManyToOne
         @JoinColumn(name = "address_id", nullable = false)
-        @GraphQLField
+        @GraphQLField(nullable = true)
         val address: Address,
 
         @OneToOne
