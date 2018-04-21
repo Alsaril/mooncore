@@ -115,8 +115,13 @@ class Query {
         // TODO think about feed algorithm and remove shuffle
 
         val resultList = ArrayList<Any>()
-        resultList.addAll(salonService.getList(limit, area, prevArea, serviceTypes))
-        resultList.addAll(masterService.getList(limit, area, prevArea, serviceTypes))
+        resultList.addAll(salonService.getList(limit, area, prevArea, serviceTypes).filter { it.photos().isNotEmpty() })
+        resultList.addAll(
+                masterService
+                        .getList(limit, area, prevArea, serviceTypes)
+                        .filter { it.salon == null && it.avatar != null && it.photos.isNotEmpty() }
+                        .take(75)
+        )
 
         if (limit.offset >= resultList.size) {
             return emptyList()
