@@ -55,6 +55,11 @@ class SeanceDaoImpl : SeanceDao {
         predicates.add(cb.greaterThanOrEqualTo(root.get<Date>("endTime"), startTime))
         predicates.add(cb.lessThanOrEqualTo(root.get<Date>("startTime"), endTime))
 
-        return em.createQuery(criteriaQuery.select(root).where(*predicates.toTypedArray())).resultList
+        return em.createQuery(
+                criteriaQuery
+                        .select(root)
+                        .where(*predicates.toTypedArray())
+                        .orderBy(cb.asc(root.get<Date>("startTime")))
+        ).resultList
     }
 }

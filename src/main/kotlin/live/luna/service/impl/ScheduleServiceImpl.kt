@@ -47,8 +47,8 @@ class ScheduleServiceImpl : ScheduleService {
         calendar.set(Calendar.MINUTE, 59)
         val endTime = calendar.time
 
-        val schedules = getMasterScheduleInRange(masterId, startTime, endTime).sortedBy { it.startTime }  // расписание мастера
-        val seances = seanceService.getMasterSeancesInRange(masterId, startTime, endTime).sortedBy { it.startTime }  // его сеансы
+        val schedules = getMasterScheduleInRange(masterId, startTime, endTime) // расписание мастера
+        val seances = seanceService.getMasterSeancesInRange(masterId, startTime, endTime) // его сеансы
 
 
         // осталось найти грубо говоря разность множеств
