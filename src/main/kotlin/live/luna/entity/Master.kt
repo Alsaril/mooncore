@@ -42,6 +42,10 @@ data class Master(
         @GraphQLField
         val stars: Int = 0,
 
+        @Column(name = "reviews_count", nullable = false)
+        @GraphQLField
+        val reviewsCount: Int = 0,
+
         @ManyToMany(cascade = [CascadeType.ALL])
         @JoinTable(
                 name = "master_sign",
@@ -112,6 +116,7 @@ data class Master(
         private var avatar: Photo? = null
         private var salon: Salon? = null
         private var stars: Int = 0
+        private var reviewsCount: Int = 0
         private var signs: List<Sign> = emptyList()
         private var photos: List<Photo> = emptyList()
         private var services: List<Service> = emptyList()
@@ -148,6 +153,11 @@ data class Master(
 
         fun setStars(stars: Int): Builder {
             this.stars = stars
+            return this
+        }
+
+        fun setReviewsCount(reviewsCount: Int): Builder {
+            this.reviewsCount = reviewsCount
             return this
         }
 
@@ -189,6 +199,7 @@ data class Master(
                 builder.avatar = master.avatar
                 builder.salon = master.salon
                 builder.stars = master.stars
+                builder.reviewsCount = master.reviewsCount
                 builder.signs = master.signs
                 builder.photos = master.photos
                 builder.services = master.services

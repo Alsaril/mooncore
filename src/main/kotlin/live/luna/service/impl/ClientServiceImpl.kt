@@ -44,6 +44,10 @@ class ClientServiceImpl : ClientService {
         return clientDao.getById(id)
     }
 
+    override fun getByUserId(userId: Long): Client? {
+        return clientDao.getByUserId(userId)
+    }
+
     override fun makeAnAppointment(
             masterId: Long,
             servicesId: List<Long>,

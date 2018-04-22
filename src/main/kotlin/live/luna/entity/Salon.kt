@@ -53,6 +53,9 @@ data class Salon(
         return masters.flatMap { it.services }.distinctBy { it.id }
     }
 
+    @GraphQLField
+    fun reviewsCount(): Int = masters.map { it.reviewsCount }.sum()
+
     @GraphQLInputObject(name = "SalonInput")
     constructor(
             @GraphQLInputField(name = "name") name: String,

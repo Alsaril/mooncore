@@ -15,6 +15,7 @@ lateinit var salonService: SalonService
 lateinit var serviceTypeService: ServiceTypeService
 lateinit var serviceService: ServiceService
 lateinit var scheduleService: ScheduleService
+lateinit var reviewService: ReviewService
 
 @Component
 class Initter
@@ -25,7 +26,8 @@ class Initter
         _serviceTypeService: ServiceTypeService,
         _serviceService: ServiceService,
         _clientService: ClientService,
-        _scheduleService: ScheduleService
+        _scheduleService: ScheduleService,
+        _reviewService: ReviewService
 ) {
     init {
         masterService = _masterService
@@ -35,6 +37,7 @@ class Initter
         serviceService = _serviceService
         clientService = _clientService
         scheduleService = _scheduleService
+        reviewService = _reviewService
     }
 }
 
@@ -85,6 +88,8 @@ class FeedItem(
         val photos: List<Photo>,
         @GraphQLField
         val stars: Int,
+        @GraphQLField
+        val reviewsCount: Int,
         @GraphQLListField(type = Sign::class)
         val signs: List<Sign>,
         @GraphQLListField(type = Service::class)
@@ -150,10 +155,10 @@ class Query {
         return scheduleService.getMasterFreeTime(masterId, days)
     }
 
-    /*@GraphQLUnion(nullable = true, types = [Master::class, Client::class])
-    fun viewer(@GraphQLContext context: UserContext): Any? {
-        return null
-    }*/
+    @GraphQLListField(type = Review::class)
+    fun masterReviews(@GraphQLArgument(name = "master_id") masterId: Long): List<Review> {
+        return reviewService.getMasterReviews(masterId)
+    }
 }
 
 @GraphQLObject
@@ -215,5 +220,14 @@ class Mutation {
                           @GraphQLArgument(name = "end_time") endTime: Date,
                           @GraphQLContext context: UserContext): Seance? {
         return clientService.makeAnAppointment(masterId, servicesId, startTime, endTime, context)
+    }
+
+    @GraphQLField(nullable = true)
+    fun addReview(
+            @GraphQLArgument(name = "seance_id") seanceId: Long,
+            @GraphQLArgument(name = "stars") stars: Int,
+            @GraphQLArgument(name = "message", nullable = true) message: String?,
+            @GraphQLContext context: UserContext): Review? {
+        return reviewService.addReview(seanceId, stars, message, context)
     }
 }
