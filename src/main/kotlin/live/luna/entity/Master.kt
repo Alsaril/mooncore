@@ -74,8 +74,10 @@ data class Master(
 
         @OneToMany(mappedBy = "master", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
         @GraphQLListField(type = Seance::class)
-        val seances: List<Seance> = listOf()
+        val seances: List<Seance> = listOf(),
 
+        @GraphQLListField(type = Review::class)
+        val lastReviews: List<Review> = listOf()
 ) {
     @GraphQLInputObject(name = "MasterInput")
     constructor(@GraphQLInputField(name = "name", nullable = true) name: String?,
@@ -120,6 +122,7 @@ data class Master(
         private var signs: List<Sign> = emptyList()
         private var photos: List<Photo> = emptyList()
         private var services: List<Service> = emptyList()
+        private var lastReviews: List<Review> = emptyList()
 
         fun setId(id: Long): Builder {
             this.id = id
@@ -176,6 +179,11 @@ data class Master(
             return this
         }
 
+        fun setLastReviews(lastReviews: List<Review>): Builder {
+            this.lastReviews = lastReviews
+            return this
+        }
+
         fun build() = Master(
                 id = id,
                 name = name,
@@ -184,9 +192,11 @@ data class Master(
                 avatar = avatar,
                 salon = salon,
                 stars = stars,
+                reviewsCount = reviewsCount,
                 signs = signs,
                 photos = photos,
-                services = services
+                services = services,
+                lastReviews = lastReviews
         )
 
         companion object {
@@ -203,6 +213,7 @@ data class Master(
                 builder.signs = master.signs
                 builder.photos = master.photos
                 builder.services = master.services
+                builder.lastReviews = master.lastReviews
                 return builder
             }
         }

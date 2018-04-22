@@ -9,6 +9,7 @@ import live.luna.graphql.Area
 import live.luna.graphql.Limit
 import live.luna.graphql.UserContext
 import live.luna.service.MasterService
+import live.luna.service.ReviewService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -27,6 +28,9 @@ class MasterServiceImpl : MasterService {
     @Autowired
     private lateinit var salonDao: SalonDao
 
+    @Autowired
+    private lateinit var reviewService: ReviewService
+
     override fun insert(master: Master) {
         masterDao.insert(master)
     }
@@ -40,7 +44,12 @@ class MasterServiceImpl : MasterService {
     }
 
     override fun getById(id: Long): Master? {
-        return masterDao.getById(id)
+        val master = masterDao.getById(id) ?: return null
+        val lastReviews = reviewService.getMasterReviews(id, Limit(0, 10))
+        return Master.Builder
+                .from(master)
+                .setLastReviews(lastReviews)
+                .build()
     }
 
     override fun getByUserId(userId: Long): Master? {

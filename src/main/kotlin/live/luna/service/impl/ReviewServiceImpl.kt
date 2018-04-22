@@ -2,9 +2,11 @@ package live.luna.service.impl
 
 import live.luna.dao.ReviewDao
 import live.luna.entity.Review
+import live.luna.graphql.Limit
 import live.luna.graphql.UserContext
 import live.luna.service.ClientService
 import live.luna.service.ReviewService
+import live.luna.service.SalonService
 import live.luna.service.SeanceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -21,6 +23,9 @@ class ReviewServiceImpl : ReviewService {
 
     @Autowired
     private lateinit var seanceService: SeanceService
+
+    @Autowired
+    private lateinit var salonService: SalonService
 
     override fun insert(review: Review) {
         reviewDao.insert(review)
@@ -61,7 +66,21 @@ class ReviewServiceImpl : ReviewService {
         return review
     }
 
-    override fun getMasterReviews(masterId: Long): List<Review> {
-        return reviewDao.getMasterReviews(masterId)
+    override fun getMasterReviews(masterId: Long, limit: Limit): List<Review> {
+        return reviewDao.getMasterReviews(masterId, limit)
+    }
+
+    override fun getSalonReviews(salonId: Long, limit: Limit): List<Review> {
+        val salon = salonService.getById(salonId, null) ?: return emptyList()
+
+        val totalReviews = ArrayList<Review>()
+        salon.masters.forEach {
+            totalReviews.addAll(getMasterReviews(it.id, limit))
+        }
+
+        return totalReviews
+                .sortedByDescending { it.date }
+                .drop(limit.offset)
+                .take(limit.limit)
     }
 }
