@@ -60,4 +60,8 @@ class ReviewServiceImpl : ReviewService {
         reviewDao.insert(review)
         return review
     }
+
+    override fun getMasterReviews(masterId: Long): List<Review> {
+        return reviewDao.getMasterReviews(masterId)
+    }
 }

@@ -9,4 +9,5 @@ interface ReviewService {
     fun delete(review: Review)
     fun getById(id: Long): Review?
     fun addReview(seanceId: Long, stars: Int, message: String?, context: UserContext): Review?
+    fun getMasterReviews(masterId: Long): List<Review>
 }

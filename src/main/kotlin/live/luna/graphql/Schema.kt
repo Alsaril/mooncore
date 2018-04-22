@@ -152,6 +152,11 @@ class Query {
             @GraphQLArgument(name = "days") days: Int): List<ScheduleService.Period> {
         return scheduleService.getMasterFreeTime(masterId, days)
     }
+
+    @GraphQLListField(type = Review::class)
+    fun masterReviews(@GraphQLArgument(name = "master_id") masterId: Long): List<Review> {
+        return reviewService.getMasterReviews(masterId)
+    }
 }
 
 @GraphQLObject
@@ -219,7 +224,7 @@ class Mutation {
     fun addReview(
             @GraphQLArgument(name = "seance_id") seanceId: Long,
             @GraphQLArgument(name = "stars") stars: Int,
-            @GraphQLArgument(name = "message", nullable = true) message: String,
+            @GraphQLArgument(name = "message", nullable = true) message: String?,
             @GraphQLContext context: UserContext): Review? {
         return reviewService.addReview(seanceId, stars, message, context)
     }
