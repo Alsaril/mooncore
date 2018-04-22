@@ -35,6 +35,20 @@ class SalonDaoImpl : SalonDao {
         return em.find(Salon::class.java, id)
     }
 
+    override fun getById(id: Long, serviceTypes: List<Long>): Salon? {
+        val salon = getById(id) ?: return null
+        if (serviceTypes.isEmpty()) {
+            return salon
+        }
+        return Salon(
+                id = salon.id,
+                name = salon.name,
+                address = salon.address,
+                avatar = salon.avatar,
+                masters = salon.masters.filter { it.supportAllServiceTypes(serviceTypes) }
+        )
+    }
+
     override fun getList(limit: Limit, area: Area?, prevArea: Area?, serviceTypes: List<Long>?): List<Salon> {
         if (limit.limit <= 0 || limit.offset < 0) {
             return emptyList()
