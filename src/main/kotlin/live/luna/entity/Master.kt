@@ -76,6 +76,7 @@ data class Master(
         @GraphQLListField(type = Seance::class)
         val seances: List<Seance> = listOf(),
 
+        @Transient
         @GraphQLListField(type = Review::class)
         val lastReviews: List<Review> = listOf()
 ) {
