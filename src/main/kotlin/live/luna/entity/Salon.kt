@@ -32,6 +32,7 @@ data class Salon(
         @GraphQLListField(type = Master::class)
         val masters: List<Master>,
 
+        @Transient
         @GraphQLListField(type = Review::class)
         val lastReviews: List<Review> = listOf()
 ) {
