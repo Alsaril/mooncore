@@ -50,10 +50,8 @@ class ReviewServiceImpl : ReviewService {
         }
 
         val review = Review(
-                id = Review.ReviewId(
-                        client = client,
-                        seance = seance
-                ),
+                client = client,
+                seance = seance,
                 stars = stars,
                 message = message,
                 date = Date()
