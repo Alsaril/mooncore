@@ -40,7 +40,7 @@ class ServiceServiceImpl : ServiceService {
     }
 
     override fun addService(context: UserContext, typeId: Long, price: BigDecimal, description: String,
-                            duration: Long, materials: List<Material>?, photos: List<Photo>?): live.luna.entity.Service? {
+                            duration: Int, materials: List<Material>?, photos: List<Photo>?): live.luna.entity.Service? {
         if (context.user == null) {
             return null;
         }

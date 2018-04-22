@@ -17,7 +17,7 @@ interface ServiceService {
             typeId: Long,
             price: BigDecimal,
             description: String,
-            duration: Long,
+            duration: Int,
             materials: List<Material>?,
             photos: List<Photo>?
     ): Service?

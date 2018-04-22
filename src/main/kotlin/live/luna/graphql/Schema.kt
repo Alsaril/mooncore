@@ -183,7 +183,7 @@ class Mutation {
     fun addService(@GraphQLArgument("type_id") typeId: Long,
                    @GraphQLArgument("price") price: BigDecimal,
                    @GraphQLArgument("description") description: String,
-                   @GraphQLArgument("duration") duration: Long,
+                   @GraphQLArgument("duration") duration: Int,
                    @GraphQLListArgument("materials",
                            nullable = true,
                            type = Material::class) materials: List<Material>?,

@@ -37,7 +37,7 @@ data class Service(
 
         @Column(name = "duration", nullable = false)
         @GraphQLField
-        val duration: Long = 0,
+        val duration: Int = 0,
 
         @ManyToMany(cascade = [CascadeType.ALL])
         @JoinTable(
