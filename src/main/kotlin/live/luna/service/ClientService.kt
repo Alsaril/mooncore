@@ -10,6 +10,7 @@ interface ClientService {
     fun update(client: Client)
     fun delete(client: Client)
     fun getById(id: Long): Client?
+    fun getByUserId(userId: Long): Client?
     fun makeAnAppointment(masterId: Long, servicesId: List<Long>,
                           startTime: Date, endTime: Date, context: UserContext): Seance?
 
