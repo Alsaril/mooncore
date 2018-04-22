@@ -99,8 +99,12 @@ class Query {
     }
 
     @GraphQLField(nullable = true)
-    fun salon(@GraphQLArgument(name = "id") id: Long): Salon? {
-        return salonService.getById(id)
+    fun salon(
+            @GraphQLArgument(name = "id") id: Long,
+            @GraphQLListArgument("service_types",
+                    type = Long::class,
+                    nullable = true) serviceTypes: List<Long>?): Salon? {
+        return salonService.getById(id, serviceTypes)
     }
 
     @GraphQLListField(type = FeedItem::class)

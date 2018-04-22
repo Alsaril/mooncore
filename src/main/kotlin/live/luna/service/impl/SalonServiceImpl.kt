@@ -26,8 +26,12 @@ class SalonServiceImpl : SalonService {
         salonDao.delete(salon)
     }
 
-    override fun getById(id: Long): Salon? {
-        return salonDao.getById(id)
+    override fun getById(id: Long, serviceTypes: List<Long>?): Salon? {
+        return if (serviceTypes == null) {
+            salonDao.getById(id)
+        } else {
+            salonDao.getById(id, serviceTypes)
+        }
     }
 
     override fun getList(limit: Limit, area: Area?, prevArea: Area?, serviceTypes: List<Long>?): List<Salon> {
