@@ -217,11 +217,10 @@ class Mutation {
 
     @GraphQLField(nullable = true)
     fun addReview(
-            @GraphQLArgument(name = "master_id") masterId: Long,
             @GraphQLArgument(name = "seance_id") seanceId: Long,
             @GraphQLArgument(name = "stars") stars: Int,
             @GraphQLArgument(name = "message", nullable = true) message: String,
             @GraphQLContext context: UserContext): Review? {
-        return reviewService.addReview(masterId, seanceId, stars, message, context)
+        return reviewService.addReview(seanceId, stars, message, context)
     }
 }

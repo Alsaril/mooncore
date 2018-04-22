@@ -8,5 +8,5 @@ interface ReviewService {
     fun update(review: Review)
     fun delete(review: Review)
     fun getById(id: Long): Review?
-    fun addReview(masterId: Long, seanceId: Long, stars: Int, message: String?, context: UserContext): Review?
+    fun addReview(seanceId: Long, stars: Int, message: String?, context: UserContext): Review?
 }

@@ -39,7 +39,7 @@ class ReviewServiceImpl : ReviewService {
     }
 
 
-    override fun addReview(masterId: Long, seanceId: Long, stars: Int, message: String?, context: UserContext): Review? {
+    override fun addReview(seanceId: Long, stars: Int, message: String?, context: UserContext): Review? {
         context.user ?: return null
 
         val client = clientService.getByUserId(context.user.id) ?: return null
