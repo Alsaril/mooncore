@@ -156,8 +156,17 @@ class Query {
     }
 
     @GraphQLListField(type = Review::class)
-    fun masterReviews(@GraphQLArgument(name = "master_id") masterId: Long): List<Review> {
-        return reviewService.getMasterReviews(masterId)
+    fun masterReviews(
+            @GraphQLArgument(name = "master_id") masterId: Long,
+            @GraphQLArgument("limit") limit: Limit): List<Review> {
+        return reviewService.getMasterReviews(masterId, limit)
+    }
+
+    @GraphQLListField(type = Review::class)
+    fun salonReviews(
+            @GraphQLArgument(name = "salon_id") salonId: Long,
+            @GraphQLArgument("limit") limit: Limit): List<Review> {
+        return reviewService.getSalonReviews(salonId, limit)
     }
 }
 

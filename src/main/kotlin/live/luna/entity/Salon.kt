@@ -30,7 +30,10 @@ data class Salon(
 
         @OneToMany(mappedBy = "salon", cascade = [CascadeType.ALL])
         @GraphQLListField(type = Master::class)
-        val masters: List<Master>
+        val masters: List<Master>,
+
+        @GraphQLListField(type = Review::class)
+        val lastReviews: List<Review> = listOf()
 ) {
 
     @GraphQLListField(type = Photo::class)

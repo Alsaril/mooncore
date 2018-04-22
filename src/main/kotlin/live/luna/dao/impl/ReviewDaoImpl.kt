@@ -4,6 +4,7 @@ import live.luna.dao.ReviewDao
 import live.luna.entity.Master
 import live.luna.entity.Review
 import live.luna.entity.Seance
+import live.luna.graphql.Limit
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -35,7 +36,7 @@ class ReviewDaoImpl : ReviewDao {
         return em.find(Review::class.java, id)
     }
 
-    override fun getMasterReviews(masterId: Long): List<Review> {
+    override fun getMasterReviews(masterId: Long, limit: Limit): List<Review> {
         val criteriaQuery = em.criteriaBuilder.createQuery(Review::class.java)
         val root = criteriaQuery.from(Review::class.java)
         val predicates = mutableListOf<Predicate>()
@@ -43,11 +44,14 @@ class ReviewDaoImpl : ReviewDao {
 
         predicates.add(cb.equal(root.get<Seance>("seance").get<Master>("master").get<Long>("id"), masterId))
 
-        return em.createQuery(
+        val typedQuery = em.createQuery(
                 criteriaQuery
                         .select(root)
                         .where(*predicates.toTypedArray())
                         .orderBy(cb.desc(root.get<Date>("date")))
-        ).resultList
+        )
+        typedQuery.firstResult = limit.offset
+        typedQuery.maxResults = limit.limit
+        return typedQuery.resultList
     }
 }
