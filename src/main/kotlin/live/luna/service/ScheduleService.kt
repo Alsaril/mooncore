@@ -1,6 +1,7 @@
 package live.luna.service
 
 import live.luna.entity.Schedule
+import live.luna.graphql.annotations.GraphQLField
 import live.luna.graphql.annotations.GraphQLObject
 import java.util.*
 
@@ -22,5 +23,10 @@ interface ScheduleService {
     fun getMasterFreeTime(masterId: Long, days: Int): List<Period>
 
     @GraphQLObject
-    class Period(val from: Date, val to: Date)
+    class Period(
+            @GraphQLField
+            val from: Date,
+            @GraphQLField
+            val to: Date
+    )
 }
