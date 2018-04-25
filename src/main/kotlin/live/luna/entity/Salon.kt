@@ -1,5 +1,6 @@
 package live.luna.entity
 
+import com.google.gson.Gson
 import live.luna.graphql.FeedItem
 import live.luna.graphql.annotations.*
 import javax.persistence.*
@@ -50,6 +51,15 @@ data class Salon(
     @GraphQLListField(type = Sign::class)
     fun signs(): List<Sign> {
         return masters.flatMap { it.signs }.distinctBy { it.id }
+    }
+
+    @GraphQLField
+    fun signs_total(): String {
+        val map = HashMap<Long, Int>()
+        masters.flatMap { it.signs }.asSequence().map { it.id }.forEach {
+            map[it] = map.getOrDefault(it, 0) + 1
+        }
+        return Gson().toJson(map)
     }
 
     @GraphQLListField(type = Service::class)
