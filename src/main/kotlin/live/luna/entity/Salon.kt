@@ -58,7 +58,10 @@ data class Salon(
     }
 
     @GraphQLField
-    fun reviewsCount(): Int = masters.map { it.reviewsCount }.sum()
+    fun ratesCount(): Int = masters.map { it.ratesCount }.sum()
+
+    @GraphQLField
+    fun commentsCount(): Int = masters.map { it.commentsCount }.sum()
 
     @GraphQLInputObject(name = "SalonInput")
     constructor(

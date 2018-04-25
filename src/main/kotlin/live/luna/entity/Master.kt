@@ -42,9 +42,13 @@ data class Master(
         @GraphQLField
         val stars: Int = 0,
 
-        @Column(name = "reviews_count", nullable = false)
+        @Column(name = "rates_count", nullable = false)
         @GraphQLField
-        val reviewsCount: Int = 0,
+        val ratesCount: Int = 0,
+
+        @Column(name = "comments_count", nullable = false)
+        @GraphQLField
+        val commentsCount: Int = 0,
 
         @ManyToMany(cascade = [CascadeType.ALL])
         @JoinTable(
@@ -119,7 +123,8 @@ data class Master(
         private var avatar: Photo? = null
         private var salon: Salon? = null
         private var stars: Int = 0
-        private var reviewsCount: Int = 0
+        private var ratesCount: Int = 0
+        private var commentsCount: Int = 0
         private var signs: List<Sign> = emptyList()
         private var photos: List<Photo> = emptyList()
         private var services: List<Service> = emptyList()
@@ -160,8 +165,13 @@ data class Master(
             return this
         }
 
-        fun setReviewsCount(reviewsCount: Int): Builder {
-            this.reviewsCount = reviewsCount
+        fun setRatesCount(ratesCount: Int): Builder {
+            this.ratesCount = ratesCount
+            return this
+        }
+
+        fun setCommentsCount(commentsCount: Int): Builder {
+            this.commentsCount = commentsCount
             return this
         }
 
@@ -193,7 +203,8 @@ data class Master(
                 avatar = avatar,
                 salon = salon,
                 stars = stars,
-                reviewsCount = reviewsCount,
+                ratesCount = ratesCount,
+                commentsCount = commentsCount,
                 signs = signs,
                 photos = photos,
                 services = services,
@@ -210,7 +221,8 @@ data class Master(
                 builder.avatar = master.avatar
                 builder.salon = master.salon
                 builder.stars = master.stars
-                builder.reviewsCount = master.reviewsCount
+                builder.ratesCount = master.ratesCount
+                builder.commentsCount = master.commentsCount
                 builder.signs = master.signs
                 builder.photos = master.photos
                 builder.services = master.services

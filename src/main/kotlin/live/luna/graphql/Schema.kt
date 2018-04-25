@@ -89,7 +89,9 @@ class FeedItem(
         @GraphQLField
         val stars: Int,
         @GraphQLField
-        val reviewsCount: Int,
+        val ratesCount: Int,
+        @GraphQLField
+        val commentsCount: Int,
         @GraphQLListField(type = Sign::class)
         val signs: List<Sign>,
         @GraphQLListField(type = Service::class)
