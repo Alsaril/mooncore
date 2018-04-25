@@ -29,7 +29,7 @@ data class Review(
         @GraphQLField
         val stars: Int,
 
-        @Column(name = "message", nullable = true)
+        @Column(name = "message", nullable = true, columnDefinition = "TEXT")
         @GraphQLField(nullable = true)
         val message: String?,
 
