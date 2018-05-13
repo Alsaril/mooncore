@@ -115,6 +115,19 @@ data class Master(
         return true
     }
 
+    fun mapSigns(): Map<Sign, Int> {
+        val result = mutableMapOf<Sign, Int>()
+        signs.forEach {
+            result[it] = result.getOrDefault(it, 0) + 1
+        }
+        return result
+    }
+
+    @GraphQLListField(type = SignGroup::class)
+    fun signGroup(): List<SignGroup> {
+        return mapSigns().map { SignGroup(it.key, it.value) }
+    }
+
     class Builder() {
         private var id: Long = 0
         private var name: String? = null
