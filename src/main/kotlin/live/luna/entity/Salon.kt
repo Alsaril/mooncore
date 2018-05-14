@@ -49,7 +49,7 @@ data class Salon(
 
     @GraphQLListField(type = Sign::class)
     fun signs(): List<Sign> {
-        return masters.flatMap { it.signs }.distinctBy { it.id }
+        return masters.flatMap { it.signs }
     }
 
     @GraphQLListField(type = Service::class)
@@ -62,6 +62,17 @@ data class Salon(
 
     @GraphQLField
     fun commentsCount(): Int = masters.map { it.commentsCount }.sum()
+
+    @GraphQLListField(type = SignGroup::class)
+    fun signGroup(): List<SignGroup> {
+        val result = mutableMapOf<Sign, Int>()
+        masters.forEach {
+            it.mapSigns().forEach {
+                result[it.key] = result.getOrDefault(it.key, 0) + it.value
+            }
+        }
+        return result.map { SignGroup(it.key, it.value) }
+    }
 
     @GraphQLInputObject(name = "SalonInput")
     constructor(

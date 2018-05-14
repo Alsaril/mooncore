@@ -26,5 +26,11 @@ data class Sign(
         @GraphQLField
         val description: String
 ) {
-        constructor() : this(name = "", icon = "", description = "")
+    constructor() : this(name = "", icon = "", description = "")
+
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Sign) return false
+        return this.id == other.id
+    }
 }
