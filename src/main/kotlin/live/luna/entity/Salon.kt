@@ -54,7 +54,7 @@ data class Salon(
     }
 
     @GraphQLField
-    fun signs_total(): String {
+    fun signsTotal(): String {
         val map = HashMap<Long, Int>()
         masters.flatMap { it.signs }.asSequence().map { it.id }.forEach {
             map[it] = map.getOrDefault(it, 0) + 1
