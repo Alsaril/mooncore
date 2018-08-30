@@ -66,8 +66,8 @@ class ReviewServiceImpl : ReviewService {
         return review
     }
 
-    override fun getMasterReviews(masterId: Long, limit: Limit): List<Review> {
-        return reviewDao.getMasterReviews(masterId, limit)
+    override fun getMasterReviews(masterId: Long, limit: Limit, includeEmptyMessages: Boolean): List<Review> {
+        return reviewDao.getMasterReviews(masterId, limit, includeEmptyMessages)
     }
 
     override fun getSalonReviews(salonId: Long, limit: Limit): List<Review> {

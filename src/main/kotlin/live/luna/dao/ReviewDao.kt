@@ -4,5 +4,5 @@ import live.luna.entity.Review
 import live.luna.graphql.Limit
 
 interface ReviewDao : CommonDao<Review> {
-    fun getMasterReviews(masterId: Long, limit: Limit): List<Review>
+    fun getMasterReviews(masterId: Long, limit: Limit, includeEmptyMessages: Boolean): List<Review>
 }

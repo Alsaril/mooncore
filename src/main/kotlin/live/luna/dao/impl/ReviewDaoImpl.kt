@@ -36,13 +36,17 @@ class ReviewDaoImpl : ReviewDao {
         return em.find(Review::class.java, id)
     }
 
-    override fun getMasterReviews(masterId: Long, limit: Limit): List<Review> {
+    override fun getMasterReviews(masterId: Long, limit: Limit, includeEmptyMessages: Boolean): List<Review> {
         val criteriaQuery = em.criteriaBuilder.createQuery(Review::class.java)
         val root = criteriaQuery.from(Review::class.java)
         val predicates = mutableListOf<Predicate>()
         val cb = em.criteriaBuilder
 
         predicates.add(cb.equal(root.get<Seance>("seance").get<Master>("master").get<Long>("id"), masterId))
+
+        if (!includeEmptyMessages) {
+            predicates.add(cb.isNotNull(root.get<String>("message")))
+        }
 
         val typedQuery = em.createQuery(
                 criteriaQuery
