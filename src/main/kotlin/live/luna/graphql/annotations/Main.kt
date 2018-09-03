@@ -1,5 +1,7 @@
 package live.luna.graphql.annotations
 
+import com.alsaril.graphql.*
+import com.alsaril.graphql.GraphQLArgument
 import graphql.schema.*
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner
 import java.lang.reflect.*

@@ -1,7 +1,7 @@
 package live.luna.graphql
 
+import com.alsaril.graphql.*
 import live.luna.entity.*
-import live.luna.graphql.annotations.*
 import live.luna.service.MasterService
 import live.luna.service.ServiceService
 import live.luna.service.ServiceTypeService

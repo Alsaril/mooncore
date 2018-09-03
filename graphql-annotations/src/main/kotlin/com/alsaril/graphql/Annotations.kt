@@ -1,6 +1,5 @@
-package live.luna.graphql.annotations
+package com.alsaril.graphql
 
-import java.util.function.Supplier
 import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
@@ -40,14 +39,24 @@ annotation class GraphQLListField(
         val type: KClass<*>
 )
 
+@Target(AnnotationTarget.FIELD, AnnotationTarget.FUNCTION)
+@MustBeDocumented
+@Retention
+annotation class S(
+        val name: String = "",
+        val description: String = "",
+        val nullable: Boolean = false,
+        val depth: Int = 1,
+        val type: KClass<*>
+)
+
 @Target(AnnotationTarget.VALUE_PARAMETER)
 @MustBeDocumented
 @Retention
 annotation class GraphQLArgument(
         val name: String,
         val description: String = "",
-        val nullable: Boolean = false,
-        val default: KClass<out Supplier<out Any>> = DefaultSupplier::class
+        val nullable: Boolean = false
 )
 
 @Target(AnnotationTarget.VALUE_PARAMETER)
@@ -58,8 +67,7 @@ annotation class GraphQLListArgument(
         val description: String = "",
         val nullable: Boolean = false,
         val depth: Int = 1,
-        val type: KClass<*>,
-        val default: KClass<out Supplier<out Any>> = DefaultSupplier::class
+        val type: KClass<*>
 )
 
 @Target(AnnotationTarget.CONSTRUCTOR)
@@ -95,7 +103,3 @@ annotation class GraphQLUnion(
         val nullable: Boolean = false,
         val types: Array<KClass<out Any>> = []
 )
-
-private class DefaultSupplier : Supplier<Unit> {
-    override fun get() = Unit
-}

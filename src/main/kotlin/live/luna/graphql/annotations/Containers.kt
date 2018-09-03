@@ -2,7 +2,6 @@ package live.luna.graphql.annotations
 
 import graphql.Scalars
 import graphql.schema.*
-import graphql.schema.GraphQLArgument
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -104,7 +103,7 @@ class ProcessorContext(private val knownInputTypes: MutableMap<Klass, InputTypeW
 internal data class MethodSignatureHolder(val arguments: List<GraphQLArgument>, val argumentInjectors: List<(EnvironmentWrapper) -> Any?>)
 
 internal class EnvironmentWrapper(val environment: DataFetchingEnvironment, klass: Klass) {
-    val source: Any = environment.getSource() ?: klass.newInstance()
+    val source: Any = environment.getSource() ?: klass.getDeclaredConstructor().newInstance()
     val context: Any = environment.getContext()
             ?: throw NullPointerException("Context hasn't been set, but is requested")
 

@@ -1,6 +1,6 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.*
+import com.alsaril.graphql.*
 import javax.persistence.*
 
 @Entity
@@ -26,7 +26,7 @@ data class Address(
         val description: String,
 
         @OneToMany(mappedBy = "address", cascade = [CascadeType.ALL])
-        @GraphQLListField(type = AddressMetro::class)
+        @S(type = AddressMetro::class)
         val metros: List<AddressMetro>
 ) {
     @GraphQLInputObject(name = "AddressInput")

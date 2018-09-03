@@ -1,6 +1,6 @@
 package live.luna.entity
 
-import live.luna.graphql.annotations.*
+import com.alsaril.graphql.*
 import javax.persistence.*
 
 @Entity
